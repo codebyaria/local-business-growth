@@ -1,0 +1,97 @@
+---
+const links = [
+  { href: '/', label: 'Home' },
+  { href: '/services/', label: 'Services' },
+  { href: '/locations/', label: 'Locations' },
+  { href: '/blog/', label: 'Blog' },
+  { href: '/contact/', label: 'Contact' },
+];
+const path = Astro.url.pathname;
+---
+
+<header class="site-header">
+  <div class="container site-header__row">
+    <a class="site-header__mark" href="/">
+      <span class="site-header__avatar" aria-hidden="true">NR</span>
+      <span>Northside Roofing</span>
+    </a>
+    <nav aria-label="Primary">
+      <ul>
+        {
+          links.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                aria-current={path === link.href ? 'page' : undefined}
+                class={path === link.href ? 'is-current' : ''}
+              >
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    border-bottom: 1px solid var(--ink);
+  }
+  .site-header__row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: clamp(1rem, 3vw, 3rem);
+    min-height: 76px;
+  }
+  .site-header__mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 800;
+    text-decoration: none;
+  }
+  .site-header__avatar {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    background: var(--ink);
+    color: var(--inverse);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+  }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.25rem;
+    justify-content: flex-end;
+  }
+  a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-weight: 700;
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+  }
+  a.is-current,
+  a:hover,
+  a:focus-visible {
+    border-bottom-color: var(--accent);
+  }
+  @media (max-width: 720px) {
+    .site-header__row {
+      grid-template-columns: 1fr;
+    }
+    ul {
+      justify-content: flex-start;
+    }
+  }
+</style>

@@ -1,0 +1,122 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { createContentAdapter } from '../../lib/content-adapter.ts';
+import type { Service } from '../../lib/strapi-client.ts';
+
+const adapter = createContentAdapter({
+  strapiUrl: import.meta.env.STRAPI_URL,
+  strapiToken: import.meta.env.STRAPI_TOKEN,
+});
+const services = await adapter.fetchServices();
+
+export async function getStaticPaths() {
+  const adapter = createContentAdapter({
+    strapiUrl: import.meta.env.STRAPI_URL,
+    strapiToken: import.meta.env.STRAPI_TOKEN,
+  });
+  const services = await adapter.fetchServices();
+  return services.map((service) => ({
+    params: { slug: service.slug },
+    props: { service },
+  }));
+}
+
+interface Props {
+  service: Service;
+}
+
+const { service } = Astro.props as Props;
+const related = services.filter((s) => s.id !== service.id).slice(0, 3);
+---
+
+<BaseLayout
+  title={service.name}
+  description={service.summary}
+  canonical={`/services/${service.slug}/`}
+>
+  <article class="container service">
+    <header class="service__header">
+      <p class="label">Service</p>
+      <h1>{service.name}</h1>
+      <p class="service__summary">{service.summary}</p>
+    </header>
+    <section class="service__body prose">
+      <p>{service.description}</p>
+    </section>
+    <section class="service__related" aria-label="Related services">
+      <p class="label">Other services</p>
+      <ul>
+        {
+          related.map((other) => (
+            <li>
+              <a href={`/services/${other.slug}/`}>{other.name}</a>
+              <span>{other.summary}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+  </article>
+</BaseLayout>
+
+<style>
+  .service {
+    padding-block: clamp(2rem, 6vw, 5rem);
+    display: grid;
+    gap: var(--space-lg, 1.5rem);
+  }
+  .service__header {
+    display: grid;
+    gap: 0.75rem;
+    padding-bottom: var(--space-lg, 1.5rem);
+    border-bottom: 1px solid var(--line);
+  }
+  h1 {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: clamp(2.4rem, 6vw, 4.6rem);
+    line-height: 1;
+    letter-spacing: -0.045em;
+    max-width: 22ch;
+  }
+  .service__summary {
+    margin: 0;
+    color: var(--soft-ink);
+    font-size: 1.125rem;
+  }
+  .service__body {
+    font-family: var(--font-longform);
+    font-size: 1.125rem;
+    line-height: 1.7;
+  }
+  .service__related {
+    border-top: 1px solid var(--line);
+    padding-top: var(--space-lg, 1.5rem);
+  }
+  .service__related ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.75rem;
+  }
+  .service__related li {
+    display: grid;
+    gap: 0.25rem;
+  }
+  .service__related a {
+    font-weight: 700;
+    border-bottom: 2px solid transparent;
+  }
+  .service__related a:hover,
+  .service__related a:focus-visible {
+    border-bottom-color: var(--accent);
+  }
+  .service__related span {
+    color: var(--soft-ink);
+  }
+</style>
+
+<style is:global>
+  /* keep getStaticPaths data fresh */
+</style>

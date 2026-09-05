@@ -1,0 +1,90 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Contact" description="Concept demo contact form for Northside Roofing.">
+  <section class="container page" aria-labelledby="contact-title">
+    <p class="label">Contact</p>
+    <h1 id="contact-title">Request a quote.</h1>
+    <p class="page__lead">
+      This demo shows where a lead-capture form would live. No real submission endpoint is wired up
+      — a real deployment must replace this with a typed server action or an email service.
+    </p>
+    <form class="form" method="post" action="#" novalidate>
+      <div>
+        <label for="name">Name</label>
+        <input id="name" name="name" required minlength="2" />
+      </div>
+      <div>
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" required />
+      </div>
+      <div>
+        <label for="service">Service</label>
+        <select id="service" name="service">
+          <option>Roof Replacement</option>
+          <option>Roof Repair</option>
+          <option>Roof Inspection</option>
+          <option>Gutter Cleaning</option>
+        </select>
+      </div>
+      <div>
+        <label for="message">Message</label>
+        <textarea id="message" name="message" rows="5" required minlength="10"></textarea>
+      </div>
+      <button type="submit" class="button button--primary" disabled>Submit (demo)</button>
+      <p class="note">Submit is disabled in the demo build.</p>
+    </form>
+  </section>
+</BaseLayout>
+
+<style>
+  .page {
+    padding-block: clamp(2rem, 6vw, 5rem);
+    display: grid;
+    gap: var(--space-lg, 1.5rem);
+  }
+  h1 {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: clamp(2.4rem, 6vw, 4.6rem);
+    line-height: 1;
+    letter-spacing: -0.045em;
+    max-width: 22ch;
+  }
+  .page__lead {
+    margin: 0;
+    max-width: 60ch;
+    color: var(--soft-ink);
+  }
+  .form {
+    display: grid;
+    gap: 1rem;
+    max-width: 36rem;
+    padding-top: var(--space-lg, 1.5rem);
+    border-top: 1px solid var(--line);
+  }
+  label {
+    font-weight: 700;
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+  input,
+  select,
+  textarea {
+    width: 100%;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid var(--ink);
+    background: var(--surface);
+    font: inherit;
+  }
+  textarea {
+    resize: vertical;
+  }
+  .note {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--soft-ink);
+  }
+</style>

@@ -1,0 +1,83 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { createContentAdapter } from '../../lib/content-adapter.ts';
+import type { Article } from '../../lib/strapi-client.ts';
+
+export async function getStaticPaths() {
+  const adapter = createContentAdapter({
+    strapiUrl: import.meta.env.STRAPI_URL,
+    strapiToken: import.meta.env.STRAPI_TOKEN,
+  });
+  const articles = await adapter.fetchArticles();
+  return articles.map((article) => ({
+    params: { slug: article.slug },
+    props: { article },
+  }));
+}
+
+interface Props {
+  article: Article;
+}
+
+const { article } = Astro.props as Props;
+const formatter = new Intl.DateTimeFormat('en-GB', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+---
+
+<BaseLayout
+  title={article.title}
+  description={article.excerpt}
+  canonical={`/blog/${article.slug}/`}
+>
+  <article class="container article">
+    <header class="article__header">
+      <p class="label">Article</p>
+      <h1>{article.title}</h1>
+      <p class="article__meta">
+        {formatter.format(new Date(article.publishedAt))} · {article.readMinutes} min read
+      </p>
+    </header>
+    <section class="article__body prose">
+      <p>{article.excerpt}</p>
+      <p>
+        The full article body is intentionally deferred until the Strapi CMS is wired up. The
+        placeholder text keeps the layout, typography, and metadata contract testable end-to-end
+        without inventing editorial content.
+      </p>
+    </section>
+  </article>
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: clamp(2rem, 6vw, 5rem);
+    display: grid;
+    gap: var(--space-lg, 1.5rem);
+  }
+  .article__header {
+    padding-bottom: var(--space-lg, 1.5rem);
+    border-bottom: 1px solid var(--line);
+  }
+  h1 {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: clamp(2.4rem, 6vw, 4.6rem);
+    line-height: 1;
+    letter-spacing: -0.045em;
+    max-width: 22ch;
+  }
+  .article__meta {
+    margin: 0.5rem 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--soft-ink);
+  }
+  .article__body {
+    font-family: var(--font-longform);
+    font-size: 1.125rem;
+    line-height: 1.7;
+  }
+</style>

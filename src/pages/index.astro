@@ -1,0 +1,140 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { createContentAdapter } from '../lib/content-adapter.ts';
+
+const adapter = createContentAdapter({
+  strapiUrl: import.meta.env.STRAPI_URL,
+  strapiToken: import.meta.env.STRAPI_TOKEN,
+});
+
+const [services, locations] = await Promise.all([
+  adapter.fetchServices(),
+  adapter.fetchLocations(),
+]);
+---
+
+<BaseLayout
+  title="Northside Roofing"
+  description="Concept demo of a local roofing business site served by an Astro + Strapi-ready content adapter."
+>
+  <section class="container hero" aria-labelledby="hero-title">
+    <p class="label">Concept / Demo project · {adapter.source}</p>
+    <h1 id="hero-title">Roofing, the way a local business actually works.</h1>
+    <p class="hero__lead">
+      This site is built as a teaching artifact. The content adapter prefers a live Strapi instance
+      and falls back to documented fixtures so the build always works.
+    </p>
+    <div class="hero__actions">
+      <a class="button button--primary" href="/services/">Browse services</a>
+      <a class="button" href="/contact/">Request a quote</a>
+    </div>
+  </section>
+
+  <section class="container proof" aria-label="Selected services">
+    <header class="section-head">
+      <p class="label">What we do</p>
+      <h2>Selected services</h2>
+    </header>
+    <ul class="grid">
+      {
+        services.slice(0, 4).map((service) => (
+          <li class="card">
+            <h3>
+              <a href={`/services/${service.slug}/`}>{service.name}</a>
+            </h3>
+            <p>{service.summary}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="container proof" aria-label="Service locations">
+    <header class="section-head">
+      <p class="label">Where we work</p>
+      <h2>Service locations</h2>
+    </header>
+    <ul class="grid">
+      {
+        locations.map((location) => (
+          <li class="card">
+            <h3>
+              <a href={`/locations/${location.slug}/`}>{location.name}</a>
+            </h3>
+            <p>
+              {location.region} · {location.serviceCount} service
+              {location.serviceCount === 1 ? '' : 's'}
+            </p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    padding-block: clamp(3rem, 7vw, 6rem);
+    display: grid;
+    gap: 1.25rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .hero h1 {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: clamp(2.4rem, 6vw, 4.6rem);
+    line-height: 1;
+    letter-spacing: -0.045em;
+    max-width: 22ch;
+  }
+  .hero__lead {
+    margin: 0;
+    max-width: 60ch;
+    color: var(--soft-ink);
+  }
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  .proof {
+    padding-block: clamp(2rem, 6vw, 5rem);
+    display: grid;
+    gap: var(--space-lg, 1.5rem);
+    border-bottom: 1px solid var(--line);
+  }
+  .section-head h2 {
+    margin: 0.25rem 0 0;
+    font-family: var(--font-sans);
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+    letter-spacing: -0.035em;
+  }
+  .grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 1rem 1.5rem;
+  }
+  .card {
+    padding-block: var(--space-md, 1rem);
+    border-top: 1px solid var(--line);
+  }
+  .card h3 {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-sans);
+    font-size: 1.125rem;
+  }
+  .card a {
+    border-bottom: 2px solid transparent;
+  }
+  .card a:hover,
+  .card a:focus-visible {
+    border-bottom-color: var(--accent);
+  }
+  .card p {
+    margin: 0;
+    color: var(--soft-ink);
+  }
+</style>

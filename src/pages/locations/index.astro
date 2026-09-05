@@ -1,0 +1,78 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { createContentAdapter } from '../../lib/content-adapter.ts';
+
+const adapter = createContentAdapter({
+  strapiUrl: import.meta.env.STRAPI_URL,
+  strapiToken: import.meta.env.STRAPI_TOKEN,
+});
+const locations = await adapter.fetchLocations();
+---
+
+<BaseLayout
+  title="Locations"
+  description="Roofing service locations for a fictional Northside Roofing business."
+>
+  <section class="container page" aria-labelledby="locations-title">
+    <p class="label">Locations · {locations.length}</p>
+    <h1 id="locations-title">Where we work.</h1>
+    <ul class="list">
+      {
+        locations.map((location) => (
+          <li>
+            <h2>
+              <a href={`/locations/${location.slug}/`}>{location.name}</a>
+            </h2>
+            <p>
+              {location.region} · {location.serviceCount} service
+              {location.serviceCount === 1 ? '' : 's'}
+            </p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .page {
+    padding-block: clamp(2rem, 6vw, 5rem);
+    display: grid;
+    gap: var(--space-lg, 1.5rem);
+  }
+  h1 {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: clamp(2.4rem, 6vw, 4.6rem);
+    line-height: 1;
+    letter-spacing: -0.045em;
+    max-width: 22ch;
+  }
+  .list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--line);
+  }
+  .list li {
+    padding-block: var(--space-lg, 1.5rem);
+    border-bottom: 1px solid var(--line);
+  }
+  .list h2 {
+    margin: 0 0 0.25rem;
+    font-family: var(--font-sans);
+    font-size: 1.5rem;
+    letter-spacing: -0.03em;
+  }
+  .list a {
+    border-bottom: 2px solid transparent;
+  }
+  .list a:hover,
+  .list a:focus-visible {
+    border-bottom-color: var(--accent);
+  }
+  .list p {
+    margin: 0;
+    color: var(--soft-ink);
+  }
+</style>

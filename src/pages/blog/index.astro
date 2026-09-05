@@ -1,0 +1,88 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { createContentAdapter } from '../../lib/content-adapter.ts';
+
+const adapter = createContentAdapter({
+  strapiUrl: import.meta.env.STRAPI_URL,
+  strapiToken: import.meta.env.STRAPI_TOKEN,
+});
+const articles = await adapter.fetchArticles();
+
+const formatter = new Intl.DateTimeFormat('en-GB', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+});
+---
+
+<BaseLayout
+  title="Blog"
+  description="Roofing blog articles for the fictional Northside Roofing business."
+>
+  <section class="container page" aria-labelledby="blog-title">
+    <p class="label">Articles · {articles.length}</p>
+    <h1 id="blog-title">Notes from the workbench.</h1>
+    <ul class="list">
+      {
+        articles.map((article) => (
+          <li>
+            <p class="meta">
+              {formatter.format(new Date(article.publishedAt))} · {article.readMinutes} min read
+            </p>
+            <h2>
+              <a href={`/blog/${article.slug}/`}>{article.title}</a>
+            </h2>
+            <p>{article.excerpt}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .page {
+    padding-block: clamp(2rem, 6vw, 5rem);
+    display: grid;
+    gap: var(--space-lg, 1.5rem);
+  }
+  h1 {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: clamp(2.4rem, 6vw, 4.6rem);
+    line-height: 1;
+    letter-spacing: -0.045em;
+    max-width: 22ch;
+  }
+  .list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--line);
+  }
+  .list li {
+    padding-block: var(--space-lg, 1.5rem);
+    border-bottom: 1px solid var(--line);
+    display: grid;
+    gap: 0.5rem;
+  }
+  .meta {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--soft-ink);
+    margin: 0;
+  }
+  .list h2 {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: clamp(1.25rem, 2.4vw, 1.75rem);
+    letter-spacing: -0.03em;
+  }
+  .list a {
+    border-bottom: 2px solid transparent;
+  }
+  .list a:hover,
+  .list a:focus-visible {
+    border-bottom-color: var(--accent);
+  }
+</style>

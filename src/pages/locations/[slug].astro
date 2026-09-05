@@ -1,0 +1,102 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { createContentAdapter } from '../../lib/content-adapter.ts';
+import type { Location } from '../../lib/strapi-client.ts';
+
+const adapter = createContentAdapter({
+  strapiUrl: import.meta.env.STRAPI_URL,
+  strapiToken: import.meta.env.STRAPI_TOKEN,
+});
+const services = await adapter.fetchServices();
+
+export async function getStaticPaths() {
+  const adapter = createContentAdapter({
+    strapiUrl: import.meta.env.STRAPI_URL,
+    strapiToken: import.meta.env.STRAPI_TOKEN,
+  });
+  const locations = await adapter.fetchLocations();
+  return locations.map((location) => ({
+    params: { slug: location.slug },
+    props: { location },
+  }));
+}
+
+interface Props {
+  location: Location;
+}
+
+const { location } = Astro.props as Props;
+---
+
+<BaseLayout
+  title={location.name}
+  description={`Roofing service in ${location.name}, ${location.region}.`}
+  canonical={`/locations/${location.slug}/`}
+>
+  <article class="container page">
+    <header class="page__header">
+      <p class="label">Location</p>
+      <h1>{location.name}</h1>
+      <p class="page__summary">{location.region}</p>
+    </header>
+    <section class="page__body">
+      <p class="label">Services available here</p>
+      <ul>
+        {
+          services.map((service) => (
+            <li>
+              <a href={`/services/${service.slug}/`}>{service.name}</a>
+              <span>{service.summary}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+  </article>
+</BaseLayout>
+
+<style>
+  .page {
+    padding-block: clamp(2rem, 6vw, 5rem);
+    display: grid;
+    gap: var(--space-lg, 1.5rem);
+  }
+  .page__header {
+    padding-bottom: var(--space-lg, 1.5rem);
+    border-bottom: 1px solid var(--line);
+  }
+  h1 {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: clamp(2.4rem, 6vw, 4.6rem);
+    line-height: 1;
+    letter-spacing: -0.045em;
+    max-width: 22ch;
+  }
+  .page__summary {
+    margin: 0.5rem 0 0;
+    color: var(--soft-ink);
+  }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.75rem;
+  }
+  li {
+    display: grid;
+    gap: 0.25rem;
+  }
+  a {
+    font-weight: 700;
+    border-bottom: 2px solid transparent;
+  }
+  a:hover,
+  a:focus-visible {
+    border-bottom-color: var(--accent);
+  }
+  span {
+    color: var(--soft-ink);
+  }
+</style>

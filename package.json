@@ -18,7 +18,8 @@
     "check": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test"
   },
   "dependencies": {
-    "astro": "^7.3.1"
+    "@astrojs/node": "^9.4.7",
+    "astro": "^5.1.5"
   },
   "allowScripts": {
     "esbuild": true

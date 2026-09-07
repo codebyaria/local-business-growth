@@ -1,11 +1,27 @@
 ---
+import type { Locale } from '../lib/i18n.ts';
+
+type Props = {
+  locale: Locale;
+};
+const { locale } = Astro.props;
 const year = new Date().getFullYear();
+const t = {
+  id: {
+    classification: 'Konsep / proyek demo · Sejuk Cepat adalah brand fiksi.',
+    credit: 'Aria Nurhadi Zain · Dibangun dengan Astro + adapter Strapi',
+  },
+  en: {
+    classification: 'Concept / demo project · Sejuk Cepat is a fictional brand.',
+    credit: 'Aria Nurhadi Zain · Built with Astro + Strapi adapter',
+  },
+}[locale];
 ---
 
 <footer class="site-footer">
   <div class="container site-footer__row">
-    <p>Concept / demo project · Northside Roofing is fictional.</p>
-    <p>&copy; <span>{year}</span> Aria Nurhadi Zain · Built with Astro + Strapi adapter</p>
+    <p>{t.classification}</p>
+    <p>&copy; <span>{year}</span> {t.credit}</p>
   </div>
 </footer>
 

@@ -1,24 +1,56 @@
 ---
+import type { Locale } from '../lib/i18n.ts';
+import { localizedHref } from '../lib/i18n.ts';
+
+type Props = {
+  locale: Locale;
+};
+const { locale } = Astro.props;
+const t = {
+  id: {
+    home: 'Beranda',
+    services: 'Layanan',
+    locations: 'Area',
+    blog: 'Blog',
+    contact: 'Kontak',
+    book: 'Booking',
+  },
+  en: {
+    home: 'Home',
+    services: 'Services',
+    locations: 'Areas',
+    blog: 'Blog',
+    contact: 'Contact',
+    book: 'Book',
+  },
+}[locale];
+
 const links = [
-  { href: '/', label: 'Home' },
-  { href: '/services/', label: 'Services' },
-  { href: '/locations/', label: 'Locations' },
-  { href: '/blog/', label: 'Blog' },
-  { href: '/contact/', label: 'Contact' },
+  { href: localizedHref(locale, '/'), label: t.home },
+  { href: localizedHref(locale, '/services/'), label: t.services },
+  { href: localizedHref(locale, '/locations/'), label: t.locations },
+  { href: localizedHref(locale, '/blog/'), label: t.blog },
+  { href: localizedHref(locale, '/booking/'), label: t.book },
+  { href: localizedHref(locale, '/contact/'), label: t.contact },
 ];
+
+const otherLocale: Locale = locale === 'id' ? 'en' : 'id';
+const switchLabel: Record<Locale, string> = { id: 'EN', en: 'ID' };
+const switchHref = localizedHref(otherLocale, Astro.url.pathname.replace(/^\/(en|id)/, '') || '/');
+
 const path = Astro.url.pathname;
 ---
 
 <header class="site-header">
   <div class="container site-header__row">
-    <a class="site-header__mark" href="/">
-      <span class="site-header__avatar" aria-hidden="true">NR</span>
-      <span>Northside Roofing</span>
+    <a class="site-header__mark" href={localizedHref(locale, '/')}>
+      <span class="site-header__avatar" aria-hidden="true">SC</span>
+      <span>Sejuk Cepat</span>
     </a>
     <nav aria-label="Primary">
       <ul>
         {
-          links.map((link) => (
+          links.map((link) => [
             <li>
               <a
                 href={link.href}
@@ -27,8 +59,19 @@ const path = Astro.url.pathname;
               >
                 {link.label}
               </a>
-            </li>
-          ))
+            </li>,
+            <li class="lang-switch">
+              <a
+                href={switchHref}
+                hreflang={otherLocale}
+                lang={otherLocale}
+                rel="alternate"
+                aria-label={`Switch language to ${otherLocale.toUpperCase()}`}
+              >
+                {switchLabel[otherLocale]}
+              </a>
+            </li>,
+          ])
         }
       </ul>
     </nav>
@@ -72,6 +115,7 @@ const path = Astro.url.pathname;
     flex-wrap: wrap;
     gap: 0.25rem 1.25rem;
     justify-content: flex-end;
+    align-items: center;
   }
   a {
     display: inline-flex;
@@ -85,6 +129,14 @@ const path = Astro.url.pathname;
   a:hover,
   a:focus-visible {
     border-bottom-color: var(--accent);
+  }
+  .lang-switch a {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    padding-inline: 0.5rem;
+    border: 1px solid var(--line);
+    margin-left: 0.5rem;
+    min-height: 32px;
   }
   @media (max-width: 720px) {
     .site-header__row {

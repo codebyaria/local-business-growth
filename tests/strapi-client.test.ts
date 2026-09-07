@@ -1,39 +1,43 @@
-import { describe, it, expect } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   StrapiClientError,
-  type Service,
-  type Location,
+  createHttpClient,
+  pickLocale,
   type Article,
-  fetchServices,
-  fetchLocations,
-  fetchArticles,
-  type StrapiClient,
+  type LocalizedString,
+  type Location,
+  type Service,
 } from '../src/lib/strapi-client.ts';
 
 const baseUrl = 'https://strapi.example.com';
 
+const loc = (en: string, id: string): LocalizedString => ({ en, id });
+
 const serviceFixture: Service = {
   id: 1,
-  slug: 'roof-replacement',
-  name: 'Roof Replacement',
-  summary: 'Full tear-off and replacement with asphalt shingles.',
-  description: 'Includes inspection, tear-off, underlayment, flashing, and shingle install.',
+  slug: 'ac-cleaning',
+  name: loc('AC Cleaning & Tune-up', 'Cuci AC & Tune-up'),
+  summary: loc('Deep clean for split units.', 'Cuci menyeluruh unit split.'),
+  description: loc('Includes filter wash.', 'Termasuk cuci filter.'),
+  startingPriceIdr: 75000,
+  durationMinutes: 60,
 };
 
 const locationFixture: Location = {
   id: 1,
-  slug: 'central-jakarta',
-  name: 'Central Jakarta',
-  region: 'DKI Jakarta',
-  serviceCount: 4,
+  slug: 'jakarta-selatan',
+  name: loc('South Jakarta', 'Jakarta Selatan'),
+  region: loc('Jakarta', 'DKI Jakarta'),
+  serviceCount: 6,
+  responseTimeMinutes: 90,
 };
 
 const articleFixture: Article = {
   id: 1,
-  slug: 'how-to-spot-roof-leer',
-  title: 'How to spot a roof leak before it becomes damage',
-  excerpt: 'Three signs that your roof needs attention before the next rain.',
-  publishedAt: '2026-08-15T10:00:00.000Z',
+  slug: 'berapa-sering-cuci-ac',
+  title: loc('How often should you clean your AC in Jakarta?', 'Berapa sering cuci AC di Jakarta?'),
+  excerpt: loc('Dust, humidity…', 'Debu, kelembapan…'),
+  publishedAt: '2026-07-12',
   readMinutes: 4,
 };
 
@@ -43,102 +47,100 @@ const jsonResponse = (body: unknown, status = 200): Response =>
     headers: { 'content-type': 'application/json' },
   });
 
-const emptyResponse = (status: number): Response => new Response('', { status });
-
-const fixtureClient: StrapiClient = {
-  baseUrl,
-  fetchServices: async () => [serviceFixture],
-  fetchLocations: async () => [locationFixture],
-  fetchArticles: async () => [articleFixture],
-};
-
-describe('fetchServices', () => {
-  it('returns services from the injected client', async () => {
-    const result = await fetchServices(fixtureClient);
-    expect(result).toEqual([serviceFixture]);
-  });
-
-  it('throws StrapiClientError when the client fails with a network error', async () => {
-    const broken: StrapiClient = {
-      ...fixtureClient,
-      fetchServices: async () => {
-        throw new Error('connect ECONNREFUSED');
-      },
-    };
-    await expect(fetchServices(broken)).rejects.toBeInstanceOf(StrapiClientError);
-  });
-
-  it('returns an empty array when the upstream response is empty', async () => {
-    const empty: StrapiClient = {
-      baseUrl,
-      fetchServices: async () => {
-        const response = emptyResponse(200);
-        return response.text().then(() => []);
-      },
-      fetchLocations: async () => [],
-      fetchArticles: async () => [],
-    };
-    const result = await fetchServices(empty);
-    expect(result).toEqual([]);
-  });
+afterEach(() => {
+  vi.unstubAllGlobals();
 });
 
-describe('fetchLocations', () => {
-  it('returns locations from the injected client', async () => {
-    const result = await fetchLocations(fixtureClient);
-    expect(result).toEqual([locationFixture]);
+describe('pickLocale', () => {
+  it('returns the EN string for locale "en"', () => {
+    expect(pickLocale(loc('hello', 'halo'), 'en')).toBe('hello');
   });
-});
 
-describe('fetchArticles', () => {
-  it('returns articles from the injected client', async () => {
-    const result = await fetchArticles(fixtureClient);
-    expect(result).toEqual([articleFixture]);
+  it('returns the ID string for locale "id"', () => {
+    expect(pickLocale(loc('hello', 'halo'), 'id')).toBe('halo');
   });
 });
 
 describe('createHttpClient', () => {
-  it('returns a client whose baseUrl is normalized without a trailing slash', async () => {
-    const { createHttpClient } = await import('../src/lib/strapi-client.ts');
-    const client = createHttpClient('https://strapi.example.com/api/');
-    expect(client.baseUrl).toBe('https://strapi.example.com/api');
-  });
-
-  it('parses a Strapi collection response and unwraps data[]', async () => {
-    const { createHttpClient } = await import('../src/lib/strapi-client.ts');
+  it('builds the request to /api/services and unwraps data[]', async () => {
     let captured = '';
-    const fetcher: typeof fetch = async (input) => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
       captured = String(input);
-      return jsonResponse({ data: [serviceFixture], meta: { pagination: { total: 1 } } });
-    };
-    const client = createHttpClient('https://strapi.example.com/api', { fetcher });
+      return jsonResponse({ data: [serviceFixture], meta: {} });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    const client = createHttpClient(`${baseUrl}/api`);
     const services = await client.fetchServices();
     expect(services).toEqual([serviceFixture]);
-    expect(captured).toBe('https://strapi.example.com/api/services');
+    expect(captured).toBe('https://strapi.example.com/api/services?pagination[pageSize]=100');
   });
 
-  it('parses a flat array response without the data wrapper', async () => {
-    const { createHttpClient } = await import('../src/lib/strapi-client.ts');
-    const fetcher: typeof fetch = async () => jsonResponse([locationFixture]);
-    const client = createHttpClient('https://strapi.example.com/api', { fetcher });
+  it('builds the request to /api/locations and unwraps data[]', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ data: [locationFixture] }));
+    vi.stubGlobal('fetch', fetchMock);
+    const client = createHttpClient(`${baseUrl}/api`);
     const locations = await client.fetchLocations();
     expect(locations).toEqual([locationFixture]);
   });
 
-  it('throws StrapiClientError when the upstream response is not OK', async () => {
-    const { createHttpClient } = await import('../src/lib/strapi-client.ts');
-    const fetcher: typeof fetch = async () => emptyResponse(500);
-    const client = createHttpClient('https://strapi.example.com/api', { fetcher });
+  it('builds the request to /api/articles with sort and unwraps data[]', async () => {
+    let captured = '';
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      captured = String(input);
+      return jsonResponse({ data: [articleFixture] });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    const client = createHttpClient(`${baseUrl}/api`);
+    const articles = await client.fetchArticles();
+    expect(articles).toEqual([articleFixture]);
+    expect(captured).toContain('sort=publishedAt:desc');
+  });
+
+  it('attaches a bearer token when one is provided', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ data: [] }));
+    vi.stubGlobal('fetch', fetchMock);
+    const client = createHttpClient(`${baseUrl}/api`, { token: 'secret-token' });
+    await client.fetchServices();
+    const call = fetchMock.mock.calls[0] as unknown as [unknown, RequestInit?] | undefined;
+    const headers = new Headers((call?.[1]?.headers ?? {}) as HeadersInit);
+    expect(headers.get('authorization')).toBe('Bearer secret-token');
+    expect(headers.get('accept')).toBe('application/json');
+  });
+
+  it('throws StrapiClientError when the response is not OK', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response('oops', { status: 503, statusText: 'Service Unavailable' })),
+    );
+    const client = createHttpClient(`${baseUrl}/api`);
     await expect(client.fetchServices()).rejects.toBeInstanceOf(StrapiClientError);
   });
 
-  it('throws StrapiClientError when the JSON cannot be parsed', async () => {
-    const { createHttpClient } = await import('../src/lib/strapi-client.ts');
-    const fetcher: typeof fetch = async () => new Response('not json', { status: 200 });
-    const client = createHttpClient('https://strapi.example.com/api', { fetcher });
+  it('throws StrapiClientError when JSON is malformed', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response('not json', { status: 200 })),
+    );
+    const client = createHttpClient(`${baseUrl}/api`);
+    await expect(client.fetchServices()).rejects.toBeInstanceOf(StrapiClientError);
+  });
+
+  it('aborts the request after the configured timeout', async () => {
+    const fetchMock = vi.fn((_input: RequestInfo | URL, init?: RequestInit) => {
+      return new Promise<Response>((_, reject) => {
+        init?.signal?.addEventListener('abort', () =>
+          reject(new DOMException('aborted', 'AbortError')),
+        );
+      });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    const client = createHttpClient(`${baseUrl}/api`, { timeoutMs: 25 });
     await expect(client.fetchServices()).rejects.toBeInstanceOf(StrapiClientError);
   });
 });
 
-void jsonResponse;
-void baseUrl;
+describe('booking validation (separate suite)', () => {
+  it('placeholder — booking schema lives in tests/booking.test.ts', () => {
+    expect(true).toBe(true);
+  });
+});

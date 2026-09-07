@@ -1,30 +1,50 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { createContentAdapter } from '../../lib/content-adapter.ts';
+import { tFor } from '../../lib/ui-strings.ts';
+import { pickLocale, type Locale } from '../../lib/strapi-client.ts';
+import { fixtureServices } from '../../lib/fixtures.ts';
+import { localizedHref } from '../../lib/i18n.ts';
 
 const adapter = createContentAdapter({
   strapiUrl: import.meta.env.STRAPI_URL,
   strapiToken: import.meta.env.STRAPI_TOKEN,
 });
 const services = await adapter.fetchServices();
+const servicesForLocale = services.length > 0 ? services : fixtureServices;
+
+const locale: Locale = (Astro.currentLocale as Locale) ?? 'id';
+const t = tFor(locale);
+
+const priceFormatter = new Intl.NumberFormat(locale === 'id' ? 'id-ID' : 'en-US');
 ---
 
-<BaseLayout
-  title="Services"
-  description="Roofing services for a fictional Northside Roofing business, served from a Strapi-ready content adapter."
->
+<BaseLayout title={t.services.title} description={t.services.pageLead} locale={locale}>
   <section class="container page" aria-labelledby="services-title">
-    <p class="label">Services · {services.length}</p>
-    <h1 id="services-title">What we do, in plain language.</h1>
+    <p class="label">{t.services.title} · {servicesForLocale.length}</p>
+    <h1 id="services-title">{t.services.pageHeading}</h1>
+    <p class="lead">{t.services.pageLead}</p>
+
     <ul class="list">
       {
-        services.map((service) => (
-          <li>
+        servicesForLocale.map((service) => (
+          <li class="row">
             <h2>
-              <a href={`/services/${service.slug}/`}>{service.name}</a>
+              <a href={localizedHref(locale, `/services/${service.slug}/`)}>
+                {pickLocale(service.name, locale)}
+              </a>
             </h2>
-            <p class="summary">{service.summary}</p>
-            <p class="description">{service.description}</p>
+            <p class="summary">{pickLocale(service.summary, locale)}</p>
+            <p class="meta">
+              <span>
+                {t.home.startingFrom} {priceFormatter.format(service.startingPriceIdr)}{' '}
+                {t.home.currency}
+              </span>
+              <span>·</span>
+              <span>
+                ~{service.durationMinutes} {t.service.minutes}
+              </span>
+            </p>
           </li>
         ))
       }
@@ -34,50 +54,50 @@ const services = await adapter.fetchServices();
 
 <style>
   .page {
-    padding-block: clamp(2rem, 6vw, 5rem);
+    padding-block: clamp(2rem, 5vw, 4rem);
     display: grid;
-    gap: var(--space-lg, 1.5rem);
+    gap: 1.5rem;
   }
-  h1 {
+  .lead {
+    color: var(--soft-ink);
     margin: 0;
-    font-family: var(--font-sans);
-    font-size: clamp(2.4rem, 6vw, 4.6rem);
-    line-height: 1;
-    letter-spacing: -0.045em;
-    max-width: 22ch;
+    max-width: 60ch;
   }
   .list {
     list-style: none;
     margin: 0;
     padding: 0;
-    border-top: 1px solid var(--line);
+    display: grid;
+    gap: 1.25rem;
   }
-  .list li {
-    padding-block: var(--space-lg, 1.5rem);
-    border-bottom: 1px solid var(--line);
+  .row {
+    border-top: 1px solid var(--line);
+    padding-block: 1rem;
     display: grid;
     gap: 0.5rem;
   }
-  .list h2 {
+  .row h2 {
     margin: 0;
-    font-family: var(--font-sans);
-    font-size: clamp(1.25rem, 2.5vw, 1.75rem);
-    letter-spacing: -0.03em;
+    font-size: 1.35rem;
   }
-  .list h2 a {
+  .row h2 a {
     border-bottom: 2px solid transparent;
   }
-  .list h2 a:hover,
-  .list h2 a:focus-visible {
+  .row h2 a:hover,
+  .row h2 a:focus-visible {
     border-bottom-color: var(--accent);
   }
   .summary {
-    margin: 0;
-    font-weight: 700;
-  }
-  .description {
-    margin: 0;
     color: var(--soft-ink);
-    max-width: 60ch;
+    margin: 0;
+  }
+  .meta {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--soft-ink);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.6rem;
   }
 </style>

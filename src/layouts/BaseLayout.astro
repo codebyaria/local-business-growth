@@ -2,36 +2,59 @@
 import '../styles/global.css';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
+import type { Locale } from '../lib/i18n.ts';
+import { DEFAULT_LOCALE, localizedHref } from '../lib/i18n.ts';
 
-interface Props {
+type Props = {
   title: string;
   description: string;
   canonical?: string;
-}
+  locale?: Locale;
+};
 
-const { title, description, canonical } = Astro.props;
-const siteName = 'Northside Roofing (demo)';
+const { title, description, canonical, locale = DEFAULT_LOCALE } = Astro.props;
+const brandByLocale = {
+  id: 'Sejuk Cepat',
+  en: 'Sejuk Cepat',
+};
+const siteName = brandByLocale[locale];
 const fullTitle = title === siteName ? title : `${title} | ${siteName}`;
+const origin = Astro.site?.toString().replace(/\/$/, '') ?? '';
+const path = Astro.url.pathname;
+const enPath = localizedHref('en', path.replace(/^\/(en|id)/, '') || '/');
+const idPath = localizedHref('id', path.replace(/^\/(en|id)/, '') || '/');
+const canonicalHref = canonical ?? (origin ? `${origin}${path}` : undefined);
 ---
 
-<!doctype html>
-<html lang="en">
+<base href={path} />
+
+<html lang={locale}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
     <meta name="robots" content="noindex" />
-    {canonical && <link rel="canonical" href={canonical} />}
+    {canonicalHref && <link rel="canonical" href={canonicalHref} />}
+    {
+      origin && (
+        <>
+          <link rel="alternate" hreflang="id" href={`${origin}${idPath}`} />
+          <link rel="alternate" hreflang="en" href={`${origin}${enPath}`} />
+          <link rel="alternate" hreflang="x-default" href={`${origin}${idPath}`} />
+        </>
+      )
+    }
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
+    <meta property="og:locale" content={locale === 'id' ? 'id_ID' : 'en_US'} />
     <title>{fullTitle}</title>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
-    <SiteHeader />
+    <SiteHeader locale={locale} />
     <main id="main"><slot /></main>
-    <SiteFooter />
+    <SiteFooter locale={locale} />
   </body>
 </html>

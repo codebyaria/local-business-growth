@@ -1,75 +1,120 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { createContentAdapter } from '../lib/content-adapter.ts';
+import { tFor } from '../lib/ui-strings.ts';
+import { pickLocale, type Locale } from '../lib/strapi-client.ts';
+import { fixtureServices, fixtureTestimonials } from '../lib/fixtures.ts';
+import { localizedHref } from '../lib/i18n.ts';
 
 const adapter = createContentAdapter({
   strapiUrl: import.meta.env.STRAPI_URL,
   strapiToken: import.meta.env.STRAPI_TOKEN,
 });
 
-const [services, locations] = await Promise.all([
+const [services, locations, settings, testimonials] = await Promise.all([
   adapter.fetchServices(),
   adapter.fetchLocations(),
+  adapter.fetchSiteSettings(),
+  adapter.fetchTestimonials(),
 ]);
+
+const locale: Locale = (Astro.currentLocale as Locale) ?? 'id';
+const t = tFor(locale);
+const servicesForLocale = services.length > 0 ? services : fixtureServices;
+const testimonialsForLocale = testimonials.length > 0 ? testimonials : fixtureTestimonials;
+
+const priceFormatter = new Intl.NumberFormat(locale === 'id' ? 'id-ID' : 'en-US');
 ---
 
 <BaseLayout
-  title="Northside Roofing"
-  description="Concept demo of a local roofing business site served by an Astro + Strapi-ready content adapter."
+  title={pickLocale(settings.brand, locale)}
+  description={pickLocale(settings.tagline, locale)}
+  locale={locale}
 >
   <section class="container hero" aria-labelledby="hero-title">
-    <p class="label">Concept / Demo project · {adapter.source}</p>
-    <h1 id="hero-title">Roofing, the way a local business actually works.</h1>
-    <p class="hero__lead">
-      This site is built as a teaching artifact. The content adapter prefers a live Strapi instance
-      and falls back to documented fixtures so the build always works.
-    </p>
+    <p class="label">{t.home.eyebrow}: {adapter.source}</p>
+    <h1 id="hero-title">{pickLocale(settings.tagline, locale)}</h1>
+    <p class="hero__lead">{t.home.lead}</p>
     <div class="hero__actions">
-      <a class="button button--primary" href="/services/">Browse services</a>
-      <a class="button" href="/contact/">Request a quote</a>
+      <a class="button button--primary" href={localizedHref(locale, '/services/')}>
+        {t.home.ctaServices}
+      </a>
+      <a class="button" href={localizedHref(locale, '/booking/')}>{t.home.ctaBook}</a>
     </div>
   </section>
 
-  <section class="container proof" aria-label="Selected services">
+  <section class="container proof" aria-label={t.home.sectionWhat}>
     <header class="section-head">
-      <p class="label">What we do</p>
-      <h2>Selected services</h2>
+      <p class="label">{t.home.sectionWhat}</p>
+      <h2>{t.home.sectionWhatHeading}</h2>
     </header>
     <ul class="grid">
       {
-        services.slice(0, 4).map((service) => (
+        servicesForLocale.slice(0, 4).map((service) => (
           <li class="card">
             <h3>
-              <a href={`/services/${service.slug}/`}>{service.name}</a>
+              <a href={localizedHref(locale, `/services/${service.slug}/`)}>
+                {pickLocale(service.name, locale)}
+              </a>
             </h3>
-            <p>{service.summary}</p>
-          </li>
-        ))
-      }
-    </ul>
-  </section>
-
-  <section class="container proof" aria-label="Service locations">
-    <header class="section-head">
-      <p class="label">Where we work</p>
-      <h2>Service locations</h2>
-    </header>
-    <ul class="grid">
-      {
-        locations.map((location) => (
-          <li class="card">
-            <h3>
-              <a href={`/locations/${location.slug}/`}>{location.name}</a>
-            </h3>
-            <p>
-              {location.region} · {location.serviceCount} service
-              {location.serviceCount === 1 ? '' : 's'}
+            <p>{pickLocale(service.summary, locale)}</p>
+            <p class="card__price">
+              {t.home.startingFrom} {priceFormatter.format(service.startingPriceIdr)}{' '}
+              {t.home.currency}
             </p>
           </li>
         ))
       }
     </ul>
   </section>
+
+  <section class="container proof" aria-label={t.home.sectionWhere}>
+    <header class="section-head">
+      <p class="label">{t.home.sectionWhere}</p>
+      <h2>{t.home.sectionWhereHeading}</h2>
+    </header>
+    <ul class="grid">
+      {
+        locations.map((location) => (
+          <li class="card">
+            <h3>
+              <a href={localizedHref(locale, `/locations/${location.slug}/`)}>
+                {pickLocale(location.name, locale)}
+              </a>
+            </h3>
+            <p>
+              {pickLocale(location.region, locale)} · {location.serviceCount}{' '}
+              {locale === 'id' ? 'layanan' : 'services'}
+            </p>
+            <p class="card__price">
+              {t.home.responseTime}: {location.responseTimeMinutes} {t.home.minutes}
+            </p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  {
+    testimonialsForLocale.length > 0 && (
+      <section class="container proof" aria-label={t.home.sectionTestimonials}>
+        <header class="section-head">
+          <p class="label">{t.home.sectionTestimonials}</p>
+          <h2>{t.home.sectionTestimonialsHeading}</h2>
+        </header>
+        <ul class="grid grid--wide">
+          {testimonialsForLocale.slice(0, 3).map((tm) => (
+            <li class="testimonial">
+              <blockquote>“{pickLocale(tm.quote, locale)}”</blockquote>
+              <p class="attribution">
+                <strong>{tm.author}</strong> · {pickLocale(tm.location, locale)}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
 </BaseLayout>
 
 <style>
@@ -117,6 +162,9 @@ const [services, locations] = await Promise.all([
     grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
     gap: 1rem 1.5rem;
   }
+  .grid--wide {
+    grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  }
   .card {
     padding-block: var(--space-md, 1rem);
     border-top: 1px solid var(--line);
@@ -136,5 +184,22 @@ const [services, locations] = await Promise.all([
   .card p {
     margin: 0;
     color: var(--soft-ink);
+  }
+  .card__price {
+    margin-top: 0.4rem !important;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+  }
+  .testimonial {
+    padding: 1rem 1.1rem;
+    border-top: 1px solid var(--line);
+  }
+  blockquote {
+    margin: 0 0 0.6rem;
+    font-style: italic;
+  }
+  .attribution {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
   }
 </style>

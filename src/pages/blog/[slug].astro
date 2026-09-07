@@ -1,26 +1,42 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { createContentAdapter } from '../../lib/content-adapter.ts';
-import type { Article } from '../../lib/strapi-client.ts';
+import { tFor } from '../../lib/ui-strings.ts';
+import { pickLocale, type Locale, type Article } from '../../lib/strapi-client.ts';
+import { fixtureArticles } from '../../lib/fixtures.ts';
+import { localizedHref } from '../../lib/i18n.ts';
+
+const adapter = createContentAdapter({
+  strapiUrl: import.meta.env.STRAPI_URL,
+  strapiToken: import.meta.env.STRAPI_TOKEN,
+});
+const all = await adapter.fetchArticles();
+const allForLocale = all.length > 0 ? all : fixtureArticles;
 
 export async function getStaticPaths() {
   const adapter = createContentAdapter({
     strapiUrl: import.meta.env.STRAPI_URL,
     strapiToken: import.meta.env.STRAPI_TOKEN,
   });
-  const articles = await adapter.fetchArticles();
-  return articles.map((article) => ({
+  const all = await adapter.fetchArticles();
+  const allForLocale = all.length > 0 ? all : fixtureArticles;
+  return allForLocale.map((article) => ({
     params: { slug: article.slug },
-    props: { article },
   }));
 }
 
-interface Props {
-  article: Article;
+export const prerender = true;
+
+const { slug } = Astro.params;
+const locale: Locale = (Astro.currentLocale as Locale) ?? 'id';
+const t = tFor(locale);
+
+const article: Article | undefined = allForLocale.find((a) => a.slug === slug);
+if (!article) {
+  return Astro.redirect(localizedHref(locale, '/blog/'), 302);
 }
 
-const { article } = Astro.props as Props;
-const formatter = new Intl.DateTimeFormat('en-GB', {
+const formatter = new Intl.DateTimeFormat(locale === 'id' ? 'id-ID' : 'en-GB', {
   year: 'numeric',
   month: 'long',
   day: 'numeric',
@@ -28,56 +44,52 @@ const formatter = new Intl.DateTimeFormat('en-GB', {
 ---
 
 <BaseLayout
-  title={article.title}
-  description={article.excerpt}
-  canonical={`/blog/${article.slug}/`}
+  title={pickLocale(article.title, locale)}
+  description={pickLocale(article.excerpt, locale)}
+  locale={locale}
 >
-  <article class="container article">
-    <header class="article__header">
-      <p class="label">Article</p>
-      <h1>{article.title}</h1>
-      <p class="article__meta">
-        {formatter.format(new Date(article.publishedAt))} · {article.readMinutes} min read
-      </p>
-    </header>
-    <section class="article__body prose">
-      <p>{article.excerpt}</p>
-      <p>
-        The full article body is intentionally deferred until the Strapi CMS is wired up. The
-        placeholder text keeps the layout, typography, and metadata contract testable end-to-end
-        without inventing editorial content.
-      </p>
-    </section>
+  <article class="container post">
+    <p class="label">{t.blogPost.eyebrow}</p>
+    <h1>{pickLocale(article.title, locale)}</h1>
+    <p class="meta">
+      {formatter.format(new Date(article.publishedAt))} · {article.readMinutes}{' '}
+      {t.blog.minRead}
+    </p>
+    <p class="lead">{pickLocale(article.excerpt, locale)}</p>
+    <p class="back">
+      <a href={localizedHref(locale, '/blog/')}>{t.blogPost.backToBlog}</a>
+    </p>
   </article>
 </BaseLayout>
 
 <style>
-  .article {
-    padding-block: clamp(2rem, 6vw, 5rem);
+  .post {
+    padding-block: clamp(2rem, 5vw, 4rem);
     display: grid;
-    gap: var(--space-lg, 1.5rem);
+    gap: 0.9rem;
+    max-width: 680px;
   }
-  .article__header {
-    padding-bottom: var(--space-lg, 1.5rem);
-    border-bottom: 1px solid var(--line);
-  }
-  h1 {
-    margin: 0;
-    font-family: var(--font-sans);
-    font-size: clamp(2.4rem, 6vw, 4.6rem);
-    line-height: 1;
-    letter-spacing: -0.045em;
-    max-width: 22ch;
-  }
-  .article__meta {
-    margin: 0.5rem 0 0;
+  .meta {
     font-family: var(--font-mono);
-    font-size: 0.78rem;
+    font-size: 0.82rem;
     color: var(--soft-ink);
+    margin: 0;
   }
-  .article__body {
-    font-family: var(--font-longform);
-    font-size: 1.125rem;
-    line-height: 1.7;
+  .lead {
+    color: var(--ink);
+    font-size: 1.05rem;
+    line-height: 1.6;
+    margin: 0;
+  }
+  .back {
+    margin: 1rem 0 0;
+    font-size: 0.9rem;
+  }
+  .back a {
+    border-bottom: 2px solid transparent;
+  }
+  .back a:hover,
+  .back a:focus-visible {
+    border-bottom-color: var(--accent);
   }
 </style>

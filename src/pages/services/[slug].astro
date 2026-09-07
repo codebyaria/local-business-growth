@@ -1,122 +1,178 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { createContentAdapter } from '../../lib/content-adapter.ts';
-import type { Service } from '../../lib/strapi-client.ts';
+import { tFor } from '../../lib/ui-strings.ts';
+import { pickLocale, type Locale, type Service } from '../../lib/strapi-client.ts';
+import { fixtureServices } from '../../lib/fixtures.ts';
+import { localizedHref } from '../../lib/i18n.ts';
 
 const adapter = createContentAdapter({
   strapiUrl: import.meta.env.STRAPI_URL,
   strapiToken: import.meta.env.STRAPI_TOKEN,
 });
-const services = await adapter.fetchServices();
+const all = await adapter.fetchServices();
+const allForLocale = all.length > 0 ? all : fixtureServices;
 
 export async function getStaticPaths() {
   const adapter = createContentAdapter({
     strapiUrl: import.meta.env.STRAPI_URL,
     strapiToken: import.meta.env.STRAPI_TOKEN,
   });
-  const services = await adapter.fetchServices();
-  return services.map((service) => ({
+  const all = await adapter.fetchServices();
+  const allForLocale = all.length > 0 ? all : fixtureServices;
+  return allForLocale.map((service) => ({
     params: { slug: service.slug },
-    props: { service },
   }));
 }
 
-interface Props {
-  service: Service;
+export const prerender = true;
+
+const { slug } = Astro.params;
+const locale: Locale = (Astro.currentLocale as Locale) ?? 'id';
+const t = tFor(locale);
+
+const service: Service | undefined = allForLocale.find((s) => s.slug === slug);
+if (!service) {
+  return Astro.redirect(localizedHref(locale, '/services/'), 302);
 }
 
-const { service } = Astro.props as Props;
-const related = services.filter((s) => s.id !== service.id).slice(0, 3);
+const related = allForLocale.filter((s) => s.slug !== service.slug).slice(0, 3);
+const priceFormatter = new Intl.NumberFormat(locale === 'id' ? 'id-ID' : 'en-US');
 ---
 
 <BaseLayout
-  title={service.name}
-  description={service.summary}
-  canonical={`/services/${service.slug}/`}
+  title={pickLocale(service.name, locale)}
+  description={pickLocale(service.summary, locale)}
+  locale={locale}
 >
   <article class="container service">
-    <header class="service__header">
-      <p class="label">Service</p>
-      <h1>{service.name}</h1>
-      <p class="service__summary">{service.summary}</p>
-    </header>
-    <section class="service__body prose">
-      <p>{service.description}</p>
-    </section>
-    <section class="service__related" aria-label="Related services">
-      <p class="label">Other services</p>
-      <ul>
-        {
-          related.map((other) => (
-            <li>
-              <a href={`/services/${other.slug}/`}>{other.name}</a>
-              <span>{other.summary}</span>
-            </li>
-          ))
-        }
-      </ul>
-    </section>
+    <p class="label">{t.service.eyebrow}</p>
+    <h1>{pickLocale(service.name, locale)}</h1>
+    <p class="lead">{pickLocale(service.summary, locale)}</p>
+
+    <dl class="meta-grid">
+      <div>
+        <dt>{t.service.startingFrom}</dt>
+        <dd>
+          {priceFormatter.format(service.startingPriceIdr)}
+          {t.home.currency}
+        </dd>
+      </div>
+      <div>
+        <dt>{t.service.duration}</dt>
+        <dd>~{service.durationMinutes} {t.service.minutes}</dd>
+      </div>
+    </dl>
+
+    <p class="description">{pickLocale(service.description, locale)}</p>
+
+    <div class="cta">
+      <a class="button button--primary" href={localizedHref(locale, '/booking/')}>
+        {t.home.ctaBook}
+      </a>
+      <a class="back" href={localizedHref(locale, '/services/')}>{t.service.backToServices}</a>
+    </div>
+
+    {
+      related.length > 0 && (
+        <section class="related" aria-label={t.service.related}>
+          <h2>{t.service.related}</h2>
+          <ul>
+            {related.map((s) => (
+              <li>
+                <a href={localizedHref(locale, `/services/${s.slug}/`)}>
+                  {pickLocale(s.name, locale)}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
   </article>
 </BaseLayout>
 
 <style>
   .service {
-    padding-block: clamp(2rem, 6vw, 5rem);
+    padding-block: clamp(2rem, 5vw, 4rem);
     display: grid;
-    gap: var(--space-lg, 1.5rem);
+    gap: 1.1rem;
+    max-width: 720px;
   }
-  .service__header {
-    display: grid;
-    gap: 0.75rem;
-    padding-bottom: var(--space-lg, 1.5rem);
-    border-bottom: 1px solid var(--line);
-  }
-  h1 {
-    margin: 0;
-    font-family: var(--font-sans);
-    font-size: clamp(2.4rem, 6vw, 4.6rem);
-    line-height: 1;
-    letter-spacing: -0.045em;
-    max-width: 22ch;
-  }
-  .service__summary {
-    margin: 0;
+  .lead {
     color: var(--soft-ink);
-    font-size: 1.125rem;
+    font-size: 1.1rem;
+    margin: 0;
   }
-  .service__body {
-    font-family: var(--font-longform);
-    font-size: 1.125rem;
-    line-height: 1.7;
+  .meta-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem 2.5rem;
+    margin: 0;
+    padding-block: 0.5rem;
+    border-block: 1px solid var(--line);
   }
-  .service__related {
+  .meta-grid dt {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--soft-ink);
+  }
+  .meta-grid dd {
+    margin: 0.15rem 0 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+  .description {
+    line-height: 1.65;
+    color: var(--ink);
+  }
+  .cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+    margin-top: 0.5rem;
+  }
+  .button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 48px;
+    padding: 0.75rem 1.25rem;
+    border: 1px solid var(--ink);
+    text-decoration: none;
+    font-weight: 700;
+  }
+  .button--primary {
+    background: var(--ink);
+    color: var(--inverse);
+  }
+  .back {
+    font-size: 0.9rem;
+  }
+  .related {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
     border-top: 1px solid var(--line);
-    padding-top: var(--space-lg, 1.5rem);
   }
-  .service__related ul {
-    list-style: none;
+  .related h2 {
+    margin: 0 0 0.6rem;
+    font-size: 1.05rem;
+  }
+  .related ul {
     margin: 0;
     padding: 0;
-    display: grid;
-    gap: 0.75rem;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.25rem;
   }
-  .service__related li {
-    display: grid;
-    gap: 0.25rem;
-  }
-  .service__related a {
-    font-weight: 700;
+  .related a {
     border-bottom: 2px solid transparent;
   }
-  .service__related a:hover,
-  .service__related a:focus-visible {
+  .related a:hover,
+  .related a:focus-visible {
     border-bottom-color: var(--accent);
   }
-  .service__related span {
-    color: var(--soft-ink);
-  }
-</style>
-
-<style is:global>
-  /* keep getStaticPaths data fresh */
 </style>

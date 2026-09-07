@@ -1,102 +1,124 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { createContentAdapter } from '../../lib/content-adapter.ts';
-import type { Location } from '../../lib/strapi-client.ts';
+import { tFor } from '../../lib/ui-strings.ts';
+import { pickLocale, type Locale, type Location } from '../../lib/strapi-client.ts';
+import { localizedHref } from '../../lib/i18n.ts';
 
 const adapter = createContentAdapter({
   strapiUrl: import.meta.env.STRAPI_URL,
   strapiToken: import.meta.env.STRAPI_TOKEN,
 });
-const services = await adapter.fetchServices();
+const all = await adapter.fetchLocations();
 
 export async function getStaticPaths() {
   const adapter = createContentAdapter({
     strapiUrl: import.meta.env.STRAPI_URL,
     strapiToken: import.meta.env.STRAPI_TOKEN,
   });
-  const locations = await adapter.fetchLocations();
-  return locations.map((location) => ({
+  const all = await adapter.fetchLocations();
+  return all.map((location) => ({
     params: { slug: location.slug },
-    props: { location },
   }));
 }
 
-interface Props {
-  location: Location;
-}
+export const prerender = true;
 
-const { location } = Astro.props as Props;
+const { slug } = Astro.params;
+const locale: Locale = (Astro.currentLocale as Locale) ?? 'id';
+const t = tFor(locale);
+
+const location: Location | undefined = all.find((l) => l.slug === slug);
+if (!location) {
+  return Astro.redirect(localizedHref(locale, '/locations/'), 302);
+}
 ---
 
 <BaseLayout
-  title={location.name}
-  description={`Roofing service in ${location.name}, ${location.region}.`}
-  canonical={`/locations/${location.slug}/`}
+  title={pickLocale(location.name, locale)}
+  description={`${pickLocale(location.region, locale)} · ${location.serviceCount} ${locale === 'id' ? 'layanan' : 'services'}`}
+  locale={locale}
 >
-  <article class="container page">
-    <header class="page__header">
-      <p class="label">Location</p>
-      <h1>{location.name}</h1>
-      <p class="page__summary">{location.region}</p>
-    </header>
-    <section class="page__body">
-      <p class="label">Services available here</p>
-      <ul>
-        {
-          services.map((service) => (
-            <li>
-              <a href={`/services/${service.slug}/`}>{service.name}</a>
-              <span>{service.summary}</span>
-            </li>
-          ))
-        }
-      </ul>
-    </section>
+  <article class="container location">
+    <p class="label">{t.location.eyebrow}</p>
+    <h1>{pickLocale(location.name, locale)}</h1>
+    <p class="lead">{pickLocale(location.region, locale)}</p>
+
+    <dl class="meta-grid">
+      <div>
+        <dt>{t.location.responseTime}</dt>
+        <dd>~{location.responseTimeMinutes} {t.location.minutes}</dd>
+      </div>
+      <div>
+        <dt>{t.location.servicesAvailable}</dt>
+        <dd>{location.serviceCount}</dd>
+      </div>
+    </dl>
+
+    <div class="cta">
+      <a class="button button--primary" href={localizedHref(locale, '/booking/')}>
+        {t.home.ctaBook}
+      </a>
+      <a class="back" href={localizedHref(locale, '/locations/')}>
+        {t.location.backToLocations}
+      </a>
+    </div>
   </article>
 </BaseLayout>
 
 <style>
-  .page {
-    padding-block: clamp(2rem, 6vw, 5rem);
+  .location {
+    padding-block: clamp(2rem, 5vw, 4rem);
     display: grid;
-    gap: var(--space-lg, 1.5rem);
+    gap: 1rem;
+    max-width: 720px;
   }
-  .page__header {
-    padding-bottom: var(--space-lg, 1.5rem);
-    border-bottom: 1px solid var(--line);
-  }
-  h1 {
+  .lead {
+    color: var(--soft-ink);
     margin: 0;
-    font-family: var(--font-sans);
-    font-size: clamp(2.4rem, 6vw, 4.6rem);
-    line-height: 1;
-    letter-spacing: -0.045em;
-    max-width: 22ch;
+    font-size: 1.05rem;
   }
-  .page__summary {
-    margin: 0.5rem 0 0;
+  .meta-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem 2.5rem;
+    margin: 0;
+    padding-block: 0.5rem;
+    border-block: 1px solid var(--line);
+  }
+  .meta-grid dt {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     color: var(--soft-ink);
   }
-  ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 0.75rem;
-  }
-  li {
-    display: grid;
-    gap: 0.25rem;
-  }
-  a {
+  .meta-grid dd {
+    margin: 0.15rem 0 0;
+    font-size: 1.1rem;
     font-weight: 700;
-    border-bottom: 2px solid transparent;
   }
-  a:hover,
-  a:focus-visible {
-    border-bottom-color: var(--accent);
+  .cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+    margin-top: 0.5rem;
   }
-  span {
-    color: var(--soft-ink);
+  .button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 48px;
+    padding: 0.75rem 1.25rem;
+    border: 1px solid var(--ink);
+    text-decoration: none;
+    font-weight: 700;
+  }
+  .button--primary {
+    background: var(--ink);
+    color: var(--inverse);
+  }
+  .back {
+    font-size: 0.9rem;
   }
 </style>

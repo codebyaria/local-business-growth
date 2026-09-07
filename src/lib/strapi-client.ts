@@ -7,31 +7,102 @@
  *
  * For this demo the public model is exposed flat to keep the contract narrow.
  * See cms-spec/ for the Strapi schema.
+ *
+ * All string fields are bilingual via `LocalizedString` so the frontend can
+ * render EN/ID without round-tripping per-page. `BookingSubmission` is the
+ * shape accepted by the `/booking` POST handler.
  */
+
+export type Locale = 'en' | 'id';
+
+/** A field that carries one string per supported locale. */
+export interface LocalizedString {
+  en: string;
+  id: string;
+}
+
+/** Helper for the rare field that intentionally has only one locale (brand). */
+export interface LocalizedBrand {
+  en: string;
+  id: string;
+}
 
 export interface Service {
   id: number;
   slug: string;
-  name: string;
-  summary: string;
-  description: string;
+  name: LocalizedString;
+  summary: LocalizedString;
+  description: LocalizedString;
+  /** Indicative starting price in Indonesian Rupiah. */
+  startingPriceIdr: number;
+  /** Average job duration in minutes. */
+  durationMinutes: number;
 }
 
 export interface Location {
   id: number;
   slug: string;
-  name: string;
-  region: string;
+  name: LocalizedString;
+  region: LocalizedString;
   serviceCount: number;
+  /** Average technician response time in minutes. */
+  responseTimeMinutes: number;
 }
 
 export interface Article {
   id: number;
   slug: string;
-  title: string;
-  excerpt: string;
+  title: LocalizedString;
+  excerpt: LocalizedString;
+  /** ISO date string YYYY-MM-DD. */
   publishedAt: string;
   readMinutes: number;
+}
+
+export interface Testimonial {
+  id: number;
+  quote: LocalizedString;
+  author: string;
+  location: LocalizedString;
+}
+
+export type UnitType = 'split' | 'window' | 'cassette' | 'standing_floor';
+export type BrandKnown =
+  'daikin' | 'lg' | 'panasonic' | 'sharp' | 'samsung' | 'gree' | 'aux' | 'daewoo' | 'other';
+export type Urgency = 'asap' | 'today' | 'this_week' | 'flexible';
+
+export interface BookingSubmission {
+  id: number;
+  submittedAt: string;
+  serviceSlug: string;
+  unitType: UnitType;
+  brand: BrandKnown;
+  brandOther?: string;
+  issue: string;
+  address: string;
+  preferredDate: string;
+  urgency: Urgency;
+  contactName: string;
+  contactPhone: string;
+  contactEmail?: string;
+  notes?: string;
+  /** Locale the customer used when submitting. */
+  locale: Locale;
+}
+
+export interface SiteSettings {
+  brand: LocalizedBrand;
+  tagline: LocalizedString;
+  establishedYear: number;
+  primaryLocale: Locale;
+  contact: {
+    whatsapp: string;
+    phone: string;
+    email: string;
+    address: LocalizedString;
+  };
+  serviceAreas: string[];
+  businessHours: LocalizedString;
 }
 
 export interface StrapiClient {
@@ -39,6 +110,8 @@ export interface StrapiClient {
   fetchServices(): Promise<Service[]>;
   fetchLocations(): Promise<Location[]>;
   fetchArticles(): Promise<Article[]>;
+  fetchSiteSettings(): Promise<SiteSettings>;
+  fetchTestimonials(): Promise<Testimonial[]>;
 }
 
 export class StrapiClientError extends Error {
@@ -51,110 +124,97 @@ export class StrapiClientError extends Error {
   }
 }
 
-interface CollectionResponse {
-  data: unknown[];
+/** Resolve a LocalizedString for the requested locale with EN fallback. */
+export function pickLocale(value: LocalizedString, locale: Locale): string {
+  if (locale === 'id') return value.id;
+  return value.en ?? value.id;
 }
 
-interface SingleResponse {
-  data: unknown;
-}
+/* ------------------------------------------------------------------ *
+ * HTTP client implementation
+ * ------------------------------------------------------------------ */
 
-export interface HttpClientOptions {
-  fetcher?: typeof fetch;
+interface HttpClientOptions {
   token?: string;
+  /** Request timeout in milliseconds. */
+  timeoutMs?: number;
 }
 
-function normalizeBaseUrl(raw: string): string {
-  return raw.replace(/\/+$/, '');
-}
-
-function isCollectionResponse(value: unknown): value is CollectionResponse {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    'data' in value &&
-    Array.isArray((value as CollectionResponse).data)
-  );
-}
-
-function isSingleResponse(value: unknown): value is SingleResponse {
-  return typeof value === 'object' && value !== null && 'data' in value;
-}
-
-export async function fetchServices(client: StrapiClient): Promise<Service[]> {
-  try {
-    return await client.fetchServices();
-  } catch (error) {
-    if (error instanceof StrapiClientError) throw error;
-    throw new StrapiClientError('Failed to fetch services', error);
-  }
-}
-
-export async function fetchLocations(client: StrapiClient): Promise<Location[]> {
-  try {
-    return await client.fetchLocations();
-  } catch (error) {
-    if (error instanceof StrapiClientError) throw error;
-    throw new StrapiClientError('Failed to fetch locations', error);
-  }
-}
-
-export async function fetchArticles(client: StrapiClient): Promise<Article[]> {
-  try {
-    return await client.fetchArticles();
-  } catch (error) {
-    if (error instanceof StrapiClientError) throw error;
-    throw new StrapiClientError('Failed to fetch articles', error);
-  }
-}
-
-async function parseJson(response: Response): Promise<unknown> {
-  const text = await response.text();
-  if (!text) return [];
-  try {
-    return JSON.parse(text);
-  } catch (error) {
-    throw new StrapiClientError('Strapi returned non-JSON body', error);
-  }
-}
-
-async function fetchCollection(
-  fetcher: typeof fetch,
+async function getJson<T>(
   url: string,
-  token: string | undefined,
-): Promise<unknown[]> {
-  const headers: Record<string, string> = { accept: 'application/json' };
-  if (token) headers.authorization = `Bearer ${token}`;
-  const response = await fetcher(url, { headers });
-  if (!response.ok) {
-    throw new StrapiClientError(`Strapi ${url} returned ${response.status}`);
+  path: string,
+  init: RequestInit,
+  signal: AbortSignal,
+): Promise<T> {
+  let res: Response;
+  try {
+    res = await fetch(new URL(path, url).toString(), {
+      ...init,
+      signal,
+      headers: {
+        accept: 'application/json',
+        ...(init.headers ?? {}),
+      },
+    });
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'AbortError') {
+      throw new StrapiClientError(`Strapi request to ${path} aborted (timeout)`, err);
+    }
+    throw new StrapiClientError(`Strapi request to ${path} failed`, err);
   }
-  const body = await parseJson(response);
-  if (Array.isArray(body)) return body;
-  if (isCollectionResponse(body)) return body.data;
-  return [];
+  if (!res.ok) {
+    throw new StrapiClientError(`Strapi responded ${res.status} ${res.statusText} for ${path}`);
+  }
+  try {
+    return (await res.json()) as T;
+  } catch (err) {
+    throw new StrapiClientError(`Strapi returned malformed JSON for ${path}`, err);
+  }
 }
 
-export function createHttpClient(
-  rawBaseUrl: string,
-  options: HttpClientOptions = {},
-): StrapiClient {
-  const baseUrl = normalizeBaseUrl(rawBaseUrl);
-  const fetcher = options.fetcher ?? fetch;
-  const token = options.token;
+function withTimeout(ms: number): { signal: AbortSignal; cancel: () => void } {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  return { signal: controller.signal, cancel: () => clearTimeout(timer) };
+}
+
+export function createHttpClient(baseUrl: string, options: HttpClientOptions = {}): StrapiClient {
+  const authHeaders: Record<string, string> = options.token
+    ? { authorization: `Bearer ${options.token}` }
+    : {};
+
+  async function get<T>(path: string): Promise<T> {
+    const { signal, cancel } = withTimeout(options.timeoutMs ?? 5000);
+    try {
+      return await getJson<T>(baseUrl, path, { headers: authHeaders }, signal);
+    } finally {
+      cancel();
+    }
+  }
 
   return {
     baseUrl,
     async fetchServices() {
-      return fetchCollection(fetcher, `${baseUrl}/services`, token) as Promise<Service[]>;
+      const res = await get<{ data: Service[] }>('/api/services?pagination[pageSize]=100');
+      return res.data;
     },
     async fetchLocations() {
-      return fetchCollection(fetcher, `${baseUrl}/locations`, token) as Promise<Location[]>;
+      const res = await get<{ data: Location[] }>('/api/locations?pagination[pageSize]=100');
+      return res.data;
     },
     async fetchArticles() {
-      return fetchCollection(fetcher, `${baseUrl}/articles`, token) as Promise<Article[]>;
+      const res = await get<{ data: Article[] }>(
+        '/api/articles?sort=publishedAt:desc&pagination[pageSize]=20',
+      );
+      return res.data;
+    },
+    async fetchTestimonials() {
+      const res = await get<{ data: Testimonial[] }>('/api/testimonials?pagination[pageSize]=10');
+      return res.data;
+    },
+    async fetchSiteSettings() {
+      const res = await get<{ data: SiteSettings }>('/api/site-setting');
+      return res.data;
     },
   };
 }
-
-void isSingleResponse;

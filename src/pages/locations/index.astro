@@ -1,31 +1,38 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { createContentAdapter } from '../../lib/content-adapter.ts';
+import { tFor } from '../../lib/ui-strings.ts';
+import { pickLocale, type Locale } from '../../lib/strapi-client.ts';
+import { localizedHref } from '../../lib/i18n.ts';
 
 const adapter = createContentAdapter({
   strapiUrl: import.meta.env.STRAPI_URL,
   strapiToken: import.meta.env.STRAPI_TOKEN,
 });
 const locations = await adapter.fetchLocations();
+const locale: Locale = (Astro.currentLocale as Locale) ?? 'id';
+const t = tFor(locale);
 ---
 
-<BaseLayout
-  title="Locations"
-  description="Roofing service locations for a fictional Northside Roofing business."
->
+<BaseLayout title={t.locations.title} description={t.locations.pageLead} locale={locale}>
   <section class="container page" aria-labelledby="locations-title">
-    <p class="label">Locations · {locations.length}</p>
-    <h1 id="locations-title">Where we work.</h1>
-    <ul class="list">
+    <p class="label">{t.locations.title} · {locations.length}</p>
+    <h1 id="locations-title">{t.locations.pageHeading}</h1>
+    <p class="lead">{t.locations.pageLead}</p>
+
+    <ul class="grid">
       {
         locations.map((location) => (
-          <li>
+          <li class="card">
             <h2>
-              <a href={`/locations/${location.slug}/`}>{location.name}</a>
+              <a href={localizedHref(locale, `/locations/${location.slug}/`)}>
+                {pickLocale(location.name, locale)}
+              </a>
             </h2>
-            <p>
-              {location.region} · {location.serviceCount} service
-              {location.serviceCount === 1 ? '' : 's'}
+            <p>{pickLocale(location.region, locale)}</p>
+            <p class="meta">
+              {location.responseTimeMinutes} {t.location.minutes} · {location.serviceCount}{' '}
+              {locale === 'id' ? 'layanan' : 'services'}
             </p>
           </li>
         ))
@@ -36,43 +43,46 @@ const locations = await adapter.fetchLocations();
 
 <style>
   .page {
-    padding-block: clamp(2rem, 6vw, 5rem);
+    padding-block: clamp(2rem, 5vw, 4rem);
     display: grid;
-    gap: var(--space-lg, 1.5rem);
+    gap: 1.5rem;
   }
-  h1 {
+  .lead {
+    color: var(--soft-ink);
     margin: 0;
-    font-family: var(--font-sans);
-    font-size: clamp(2.4rem, 6vw, 4.6rem);
-    line-height: 1;
-    letter-spacing: -0.045em;
-    max-width: 22ch;
+    max-width: 60ch;
   }
-  .list {
+  .grid {
     list-style: none;
     margin: 0;
     padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 1rem 1.5rem;
+  }
+  .card {
+    padding-block: 1rem;
     border-top: 1px solid var(--line);
+    display: grid;
+    gap: 0.4rem;
   }
-  .list li {
-    padding-block: var(--space-lg, 1.5rem);
-    border-bottom: 1px solid var(--line);
+  .card h2 {
+    margin: 0;
+    font-size: 1.2rem;
   }
-  .list h2 {
-    margin: 0 0 0.25rem;
-    font-family: var(--font-sans);
-    font-size: 1.5rem;
-    letter-spacing: -0.03em;
-  }
-  .list a {
+  .card a {
     border-bottom: 2px solid transparent;
   }
-  .list a:hover,
-  .list a:focus-visible {
+  .card a:hover,
+  .card a:focus-visible {
     border-bottom-color: var(--accent);
   }
-  .list p {
+  .card p {
     margin: 0;
     color: var(--soft-ink);
+  }
+  .meta {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
   }
 </style>

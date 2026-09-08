@@ -17,9 +17,9 @@ export const ui = {
       contact: 'Kontak',
     },
     home: {
-      eyebrow: 'Konsep / proyek demo · Sumber konten',
+      eyebrow: 'Portfolio demo · Sample content',
       heading: 'Service AC, kulkas, dan freezer same-day se-Jabodetabek.',
-      lead: 'Website bisnis lokal fiksi — dibangun dengan Astro + adapter Strapi. Konten pakai data stat; pindah ke Strapi tinggal isi STRAPI_URL di .env.',
+      lead: 'Website bisnis lokal contoh — dibangun dengan Astro + adapter Strapi, bilingual routes, SEO pages, dan booking flow.',
       ctaServices: 'Lihat layanan',
       ctaBook: 'Booking sekarang',
       sectionWhat: 'Apa yang kami kerjakan',
@@ -51,7 +51,8 @@ export const ui = {
     locations: {
       title: 'Area',
       pageHeading: 'Area layanan kami.',
-      pageLead: 'Klaim masuk ke teknisi terdekat. Estimasi respon di bawah ini, bukan janji.',
+      pageLead:
+        'Permintaan masuk ke teknisi terdekat. Estimasi respon membantu pelanggan memilih area layanan.',
     },
     location: {
       eyebrow: 'Area',
@@ -149,9 +150,9 @@ export const ui = {
       contact: 'Contact',
     },
     home: {
-      eyebrow: 'Concept / demo project · Content source',
+      eyebrow: 'Portfolio demo · Sample content',
       heading: 'Same-day AC, fridge, and freezer repair across Jakarta.',
-      lead: 'A fictional Indonesian small-business website — built with Astro + a Strapi-ready content adapter. Content uses static fixtures; switch to a real Strapi instance by setting STRAPI_URL in .env.',
+      lead: 'A sample Indonesian small-business website built with Astro, a Strapi-ready content adapter, bilingual routes, SEO pages, and a booking flow.',
       ctaServices: 'Browse services',
       ctaBook: 'Book a visit',
       sectionWhat: 'What we do',
@@ -184,7 +185,7 @@ export const ui = {
       title: 'Areas',
       pageHeading: 'Our service areas.',
       pageLead:
-        'Jobs route to the nearest technician. The response time below is an estimate, not a promise.',
+        'Jobs route to the nearest technician. Response-time estimates help customers choose the right service area.',
     },
     location: {
       eyebrow: 'Area',

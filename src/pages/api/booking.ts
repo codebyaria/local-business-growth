@@ -14,7 +14,7 @@ import type {
   Urgency,
   UnitType,
 } from '../../lib/strapi-client.ts';
-import { fixtureBookings } from '../../lib/fixtures.ts';
+import { fixtureBookings, fixtureServices } from '../../lib/fixtures.ts';
 
 export const prerender = false;
 
@@ -32,6 +32,7 @@ const BRANDS: readonly BrandKnown[] = [
 ];
 const URGENCIES: readonly Urgency[] = ['asap', 'today', 'this_week', 'flexible'];
 const LOCALES: readonly Locale[] = ['id', 'en'];
+const SERVICE_SLUGS = new Set(fixtureServices.map((service) => service.slug));
 
 interface ValidationFailure {
   ok: false;
@@ -59,6 +60,7 @@ function fail(field: string, message: string): ValidationFailure {
 export function parseBookingForm(form: FormData): ValidationSuccess | ValidationFailure {
   const serviceSlug = asString(form.get('serviceSlug'));
   if (!serviceSlug) return fail('serviceSlug', 'serviceSlug required');
+  if (!SERVICE_SLUGS.has(serviceSlug)) return fail('serviceSlug', 'Unknown service');
 
   const unitType = asString(form.get('unitType'));
   if (!(UNIT_TYPES as readonly string[]).includes(unitType)) {

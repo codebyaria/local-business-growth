@@ -1,8 +1,8 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { tFor } from '../../lib/ui-strings.ts';
-import type { Locale } from '../../lib/strapi-client.ts';
-import { localeFromPath, localizedHref } from '../../lib/i18n.ts';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { tFor } from '../../../lib/ui-strings.ts';
+import type { Locale } from '../../../lib/strapi-client.ts';
+import { localeFromPath, localizedHref } from '../../../lib/i18n.ts';
 
 const locale: Locale = localeFromPath(Astro.url.pathname);
 const t = tFor(locale);

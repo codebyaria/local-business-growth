@@ -1,9 +1,9 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import { createContentAdapter } from '../lib/content-adapter.ts';
-import { tFor } from '../lib/ui-strings.ts';
-import { localeFromPath } from '../lib/i18n.ts';
-import { pickLocale, type Locale } from '../lib/strapi-client.ts';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { createContentAdapter } from '../../lib/content-adapter.ts';
+import { tFor } from '../../lib/ui-strings.ts';
+import { localeFromPath } from '../../lib/i18n.ts';
+import { pickLocale, type Locale } from '../../lib/strapi-client.ts';
 
 const adapter = createContentAdapter({
   strapiUrl: import.meta.env.STRAPI_URL,

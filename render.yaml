@@ -2,8 +2,9 @@ services:
   - type: pserv
     name: sejuk-cepat-cms-db
     plan: free
-    ipAllowList: [] # only allow internal connections from the web service
     # 90-day free trial; Render sends a reminder email before it expires.
+    # No runtime/startCommand/ipAllowList on pserv — it's a managed database.
+
   - type: web
     name: sejuk-cepat-cms
     runtime: node

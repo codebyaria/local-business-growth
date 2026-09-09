@@ -17,8 +17,8 @@ import type {
 
 const brandName = { en: 'Sejuk Cepat', id: 'Sejuk Cepat' };
 const brandTagline = {
-  en: 'Same-day AC, fridge, and freezer repair across Jakarta.',
-  id: 'Service AC, kulkas, dan freezer same-day se-Jabodetabek.',
+  en: 'AC, fridge, and freezer repair in Jabodetabek.',
+  id: 'Service AC, kulkas, dan freezer di Jabodetabek.',
 };
 const brandEstablishedYear = 2019;
 

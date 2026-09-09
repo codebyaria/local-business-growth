@@ -18,8 +18,8 @@ export const ui = {
     },
     home: {
       eyebrow: 'Teknisi AC panggilan',
-      heading: 'Service AC, kulkas, dan freezer same-day se-Jabodetabek.',
-      lead: 'Booking teknisi AC, kulkas, dan freezer untuk rumah, ruko, dan kantor kecil. Pilih layanan, cek area, lalu tim menghubungi Anda untuk konfirmasi jadwal.',
+      heading: 'Service AC, kulkas, dan freezer di Jabodetabek.',
+      lead: 'Jadwalkan teknisi untuk rumah, ruko, atau kantor kecil. Pilih layanan, cek area, lalu tim menghubungi Anda untuk konfirmasi waktu dan estimasi biaya.',
       ctaServices: 'Lihat layanan',
       ctaBook: 'Booking sekarang',
       sectionWhat: 'Apa yang kami kerjakan',
@@ -151,8 +151,8 @@ export const ui = {
     },
     home: {
       eyebrow: 'Same-day cooling service',
-      heading: 'Same-day AC, fridge, and freezer repair across Jakarta.',
-      lead: 'Book AC, fridge, and freezer technicians for homes, shop houses, and small offices. Choose a service, check your area, then the team confirms the schedule.',
+      heading: 'AC, fridge, and freezer repair in Jabodetabek.',
+      lead: 'Book a technician for homes, shop houses, or small offices. Choose a service, check the nearest area, then the team confirms timing and estimated cost.',
       ctaServices: 'Browse services',
       ctaBook: 'Book a visit',
       sectionWhat: 'What we do',

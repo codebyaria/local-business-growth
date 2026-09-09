@@ -23,8 +23,26 @@ const t = tFor(locale);
 const servicesForLocale = services.length > 0 ? services : fixtureServices;
 const testimonialsForLocale = testimonials.length > 0 ? testimonials : fixtureTestimonials;
 const contentSourceLabel = adapter.source === 'strapi' ? 'CMS content' : 'sample content';
+const firstService = servicesForLocale[0];
+const firstLocation = locations[0];
 
 const priceFormatter = new Intl.NumberFormat(locale === 'id' ? 'id-ID' : 'en-US');
+const trustItems =
+  locale === 'id'
+    ? ['Teknisi area terdekat', 'Estimasi harga jelas', 'Booking via WhatsApp', 'Siap Strapi CMS']
+    : ['Nearest-area technician', 'Clear price estimate', 'WhatsApp booking', 'Strapi CMS-ready'];
+const howItWorks =
+  locale === 'id'
+    ? [
+        ['Pilih layanan', 'Pilih keluhan dan tipe unit dari halaman booking.'],
+        ['Kami cek area', 'Permintaan diarahkan ke teknisi terdekat berdasarkan lokasi.'],
+        ['Jadwal dikonfirmasi', 'Pelanggan menerima follow-up WhatsApp dan nomor referensi.'],
+      ]
+    : [
+        ['Choose a service', 'Select the issue and unit type from the booking page.'],
+        ['We check the area', 'The request routes to the nearest available technician.'],
+        ['Schedule confirmed', 'Customers receive WhatsApp follow-up and a reference number.'],
+      ];
 ---
 
 <BaseLayout
@@ -32,78 +50,165 @@ const priceFormatter = new Intl.NumberFormat(locale === 'id' ? 'id-ID' : 'en-US'
   description={pickLocale(settings.tagline, locale)}
   locale={locale}
 >
-  <section class="container hero" aria-labelledby="hero-title">
-    <p class="label">{t.home.eyebrow} · {contentSourceLabel}</p>
-    <h1 id="hero-title">{pickLocale(settings.tagline, locale)}</h1>
-    <p class="hero__lead">{t.home.lead}</p>
-    <div class="hero__actions">
-      <a class="button button--primary" href={localizedHref(locale, '/services/')}>
-        {t.home.ctaServices}
-      </a>
-      <a class="button" href={localizedHref(locale, '/booking/')}>{t.home.ctaBook}</a>
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="container hero__grid">
+      <div class="hero__copy">
+        <p class="pill">❄ {t.home.eyebrow} · {contentSourceLabel}</p>
+        <h1 id="hero-title">{pickLocale(settings.tagline, locale)}</h1>
+        <p class="hero__lead">{t.home.lead}</p>
+        <div class="hero__actions">
+          <a class="button button--primary" href={localizedHref(locale, '/booking/')}
+            >{t.home.ctaBook}</a
+          >
+          <a class="button" href={localizedHref(locale, '/services/')}>{t.home.ctaServices}</a>
+        </div>
+        <ul
+          class="trust-strip"
+          aria-label={locale === 'id' ? 'Sinyal kepercayaan' : 'Trust signals'}
+        >
+          {trustItems.map((item) => <li>✓ {item}</li>)}
+        </ul>
+      </div>
+
+      <aside
+        class="booking-card"
+        aria-label={locale === 'id' ? 'Ringkasan booking' : 'Booking summary'}
+      >
+        <div class="booking-card__top">
+          <span>{locale === 'id' ? 'Estimasi respon' : 'Estimated response'}</span>
+          <strong>{firstLocation?.responseTimeMinutes ?? 35} {t.home.minutes}</strong>
+        </div>
+        <div class="booking-card__service">
+          <p>{locale === 'id' ? 'Layanan populer' : 'Popular service'}</p>
+          <h2>{firstService ? pickLocale(firstService.name, locale) : t.services.title}</h2>
+          <span>
+            {t.home.startingFrom}
+            {firstService ? priceFormatter.format(firstService.startingPriceIdr) : '150.000'}
+            {t.home.currency}
+          </span>
+        </div>
+        <div class="route-card">
+          <span>{locale === 'id' ? 'Rute teknisi' : 'Technician route'}</span>
+          <strong
+            >{
+              locale === 'id'
+                ? 'Jakarta Selatan → Tangerang Selatan'
+                : 'South Jakarta → South Tangerang'
+            }</strong
+          >
+          <small
+            >{
+              locale === 'id'
+                ? 'Contoh area layanan untuk demo'
+                : 'Sample service-area route for the demo'
+            }</small
+          >
+        </div>
+      </aside>
     </div>
   </section>
 
-  <section class="container proof" aria-label={t.home.sectionWhat}>
-    <header class="section-head">
-      <p class="label">{t.home.sectionWhat}</p>
-      <h2>{t.home.sectionWhatHeading}</h2>
-    </header>
-    <ul class="grid">
+  <section class="container services-section" aria-label={t.home.sectionWhat}>
+    <div class="section-head section-head--split">
+      <div>
+        <p class="label">{t.home.sectionWhat}</p>
+        <h2>{t.home.sectionWhatHeading}</h2>
+      </div>
+      <a href={localizedHref(locale, '/services/')}
+        >{locale === 'id' ? 'Semua layanan →' : 'All services →'}</a
+      >
+    </div>
+    <ul class="service-grid">
       {
         servicesForLocale.slice(0, 4).map((service) => (
-          <li class="card">
+          <li class="service-card">
+            <span class="service-card__icon" aria-hidden="true">
+              ❄
+            </span>
             <h3>
               <a href={localizedHref(locale, `/services/${service.slug}/`)}>
                 {pickLocale(service.name, locale)}
               </a>
             </h3>
             <p>{pickLocale(service.summary, locale)}</p>
-            <p class="card__price">
-              {t.home.startingFrom} {priceFormatter.format(service.startingPriceIdr)}{' '}
-              {t.home.currency}
-            </p>
+            <div class="service-card__meta">
+              <span>
+                {priceFormatter.format(service.startingPriceIdr)} {t.home.currency}
+              </span>
+              <span>
+                {service.durationMinutes} {t.service.minutes}
+              </span>
+            </div>
           </li>
         ))
       }
     </ul>
   </section>
 
-  <section class="container proof" aria-label={t.home.sectionWhere}>
-    <header class="section-head">
+  <section class="container split-section" aria-label={t.home.sectionWhere}>
+    <div class="area-panel">
       <p class="label">{t.home.sectionWhere}</p>
       <h2>{t.home.sectionWhereHeading}</h2>
-    </header>
-    <ul class="grid">
+      <p>
+        {
+          locale === 'id'
+            ? 'Area dibuat sebagai landing lokal agar halaman bisa menargetkan pencarian service AC di tiap wilayah.'
+            : 'Service areas are structured as local landing pages for region-specific search intent.'
+        }
+      </p>
+      <a class="button" href={localizedHref(locale, '/locations/')}
+        >{locale === 'id' ? 'Lihat area' : 'View areas'}</a
+      >
+    </div>
+    <ul class="area-list">
       {
-        locations.map((location) => (
-          <li class="card">
-            <h3>
-              <a href={localizedHref(locale, `/locations/${location.slug}/`)}>
-                {pickLocale(location.name, locale)}
-              </a>
-            </h3>
-            <p>
-              {pickLocale(location.region, locale)} · {location.serviceCount}{' '}
-              {locale === 'id' ? 'layanan' : 'services'}
-            </p>
-            <p class="card__price">
-              {t.home.responseTime}: {location.responseTimeMinutes} {t.home.minutes}
-            </p>
+        locations.slice(0, 6).map((location) => (
+          <li>
+            <span>{pickLocale(location.name, locale)}</span>
+            <strong>
+              {location.responseTimeMinutes} {t.home.minutes}
+            </strong>
           </li>
         ))
       }
     </ul>
+  </section>
+
+  <section
+    class="container process-section"
+    aria-label={locale === 'id' ? 'Cara kerja booking' : 'How booking works'}
+  >
+    <div class="section-head">
+      <p class="label">{locale === 'id' ? 'Cara kerja' : 'How it works'}</p>
+      <h2>
+        {
+          locale === 'id'
+            ? 'Dari landing page ke jadwal teknisi.'
+            : 'From landing page to technician schedule.'
+        }
+      </h2>
+    </div>
+    <ol class="steps">
+      {
+        howItWorks.map(([title, body], index) => (
+          <li>
+            <span>{String(index + 1).padStart(2, '0')}</span>
+            <h3>{title}</h3>
+            <p>{body}</p>
+          </li>
+        ))
+      }
+    </ol>
   </section>
 
   {
     testimonialsForLocale.length > 0 && (
-      <section class="container proof" aria-label={t.home.sectionTestimonials}>
-        <header class="section-head">
+      <section class="container testimonials" aria-label={t.home.sectionTestimonials}>
+        <div class="section-head section-head--center">
           <p class="label">{t.home.sectionTestimonials}</p>
           <h2>{t.home.sectionTestimonialsHeading}</h2>
-        </header>
-        <ul class="grid grid--wide">
+        </div>
+        <ul class="testimonial-grid">
           {testimonialsForLocale.slice(0, 3).map((tm) => (
             <li class="testimonial">
               <blockquote>“{pickLocale(tm.quote, locale)}”</blockquote>
@@ -120,87 +225,279 @@ const priceFormatter = new Intl.NumberFormat(locale === 'id' ? 'id-ID' : 'en-US'
 
 <style>
   .hero {
-    padding-block: clamp(3rem, 7vw, 6rem);
+    position: relative;
+    overflow: hidden;
+    padding-block: clamp(2rem, 6vw, 5.5rem);
+  }
+  .hero::after {
+    position: absolute;
+    inset: auto -8rem -10rem auto;
+    width: 28rem;
+    height: 28rem;
+    border-radius: 999px;
+    background: rgb(255 209 102 / 36%);
+    content: '';
+    filter: blur(20px);
+  }
+  .hero__grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(19rem, 0.85fr);
+    gap: clamp(1.5rem, 5vw, 4rem);
+    align-items: center;
+  }
+  .hero__copy {
     display: grid;
     gap: 1.25rem;
-    border-bottom: 1px solid var(--line);
   }
   .hero h1 {
     margin: 0;
-    font-family: var(--font-sans);
-    font-size: clamp(2.4rem, 6vw, 4.6rem);
-    line-height: 1;
-    letter-spacing: -0.045em;
-    max-width: 22ch;
+    max-width: 13ch;
+    font-size: clamp(3rem, 8vw, 6.6rem);
+    line-height: 0.92;
+    letter-spacing: -0.075em;
   }
   .hero__lead {
     margin: 0;
-    max-width: 60ch;
+    max-width: 58ch;
     color: var(--soft-ink);
+    font-size: clamp(1.05rem, 2vw, 1.25rem);
   }
-  .hero__actions {
+  .hero__actions,
+  .section-head--split {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: 0.75rem;
   }
-  .proof {
-    padding-block: clamp(2rem, 6vw, 5rem);
+  .trust-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin: 0.5rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .trust-strip li {
+    padding: 0.45rem 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: rgb(255 255 255 / 72%);
+    color: var(--soft-ink);
+    font-size: 0.9rem;
+    font-weight: 750;
+  }
+  .booking-card {
     display: grid;
-    gap: var(--space-lg, 1.5rem);
-    border-bottom: 1px solid var(--line);
+    gap: 1rem;
+    padding: clamp(1rem, 3vw, 1.5rem);
+    border: 1px solid rgb(255 255 255 / 70%);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(180deg, rgb(255 255 255 / 86%), rgb(255 255 255 / 72%));
+    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(18px);
+  }
+  .booking-card__top,
+  .route-card,
+  .booking-card__service {
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    padding: 1rem;
+    box-shadow: 0 1px 0 rgb(255 255 255 / 90%) inset;
+  }
+  .booking-card__top {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    color: var(--soft-ink);
+  }
+  .booking-card__top strong {
+    color: var(--accent-strong);
+    font-size: 1.35rem;
+  }
+  .booking-card__service {
+    background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+    color: var(--inverse);
+  }
+  .booking-card__service p,
+  .booking-card__service h2 {
+    margin: 0;
+  }
+  .booking-card__service h2 {
+    margin-block: 0.25rem;
+    font-size: clamp(1.65rem, 4vw, 2.6rem);
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+  .route-card {
+    display: grid;
+    gap: 0.15rem;
+  }
+  .route-card span,
+  .route-card small {
+    color: var(--soft-ink);
+  }
+  .services-section,
+  .split-section,
+  .process-section,
+  .testimonials {
+    padding-block: clamp(2.5rem, 7vw, 5.5rem);
+  }
+  .section-head {
+    display: grid;
+    gap: 0.4rem;
+    margin-bottom: 1.25rem;
   }
   .section-head h2 {
-    margin: 0.25rem 0 0;
-    font-family: var(--font-sans);
-    font-size: clamp(1.5rem, 3vw, 2.25rem);
-    letter-spacing: -0.035em;
-  }
-  .grid {
-    list-style: none;
     margin: 0;
-    padding: 0;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    line-height: 1;
+    letter-spacing: -0.06em;
+  }
+  .section-head--split {
+    justify-content: space-between;
+  }
+  .section-head--split a {
+    color: var(--accent-strong);
+    font-weight: 850;
+    text-decoration: none;
+  }
+  .service-grid,
+  .testimonial-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-    gap: 1rem 1.5rem;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
-  .grid--wide {
-    grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  .service-card,
+  .testimonial {
+    display: grid;
+    gap: 0.8rem;
+    padding: 1.1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
   }
-  .card {
-    padding-block: var(--space-md, 1rem);
-    border-top: 1px solid var(--line);
+  .service-card__icon {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    border-radius: 16px;
+    background: var(--accent-soft);
   }
-  .card h3 {
-    margin: 0 0 0.5rem;
-    font-family: var(--font-sans);
-    font-size: 1.125rem;
+  .service-card h3,
+  .service-card p {
+    margin: 0;
   }
-  .card a {
-    border-bottom: 2px solid transparent;
+  .service-card a {
+    text-decoration: none;
   }
-  .card a:hover,
-  .card a:focus-visible {
-    border-bottom-color: var(--accent);
+  .service-card p {
+    color: var(--soft-ink);
   }
-  .card p {
+  .service-card__meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.7rem;
+    color: var(--accent-strong);
+    font-size: 0.86rem;
+    font-weight: 850;
+  }
+  .split-section {
+    display: grid;
+    grid-template-columns: 0.85fr 1.15fr;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  .area-panel,
+  .area-list {
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+  }
+  .area-panel {
+    display: grid;
+    align-content: center;
+    gap: 1rem;
+    padding: clamp(1.25rem, 4vw, 2rem);
+  }
+  .area-panel h2,
+  .area-panel p {
+    margin: 0;
+  }
+  .area-panel p {
+    color: var(--soft-ink);
+  }
+  .area-list {
+    display: grid;
+    gap: 0;
+    margin: 0;
+    padding: 0.7rem;
+    list-style: none;
+  }
+  .area-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem 1rem;
+    border-radius: 1rem;
+  }
+  .area-list li:nth-child(odd) {
+    background: var(--surface-tint);
+  }
+  .area-list strong {
+    color: var(--accent-strong);
+  }
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .steps li {
+    padding: 1.15rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+  }
+  .steps span {
+    color: var(--sun-strong);
+    font-family: var(--font-mono);
+    font-weight: 900;
+  }
+  .steps h3 {
+    margin: 0.7rem 0 0.35rem;
+  }
+  .steps p,
+  .testimonial blockquote,
+  .attribution {
     margin: 0;
     color: var(--soft-ink);
   }
-  .card__price {
-    margin-top: 0.4rem !important;
-    font-family: var(--font-mono);
-    font-size: 0.82rem;
+  .section-head--center {
+    text-align: center;
+    justify-items: center;
   }
-  .testimonial {
-    padding: 1rem 1.1rem;
-    border-top: 1px solid var(--line);
+  .testimonial blockquote {
+    color: var(--ink);
+    font-size: 1.05rem;
   }
-  blockquote {
-    margin: 0 0 0.6rem;
-    font-style: italic;
-  }
-  .attribution {
-    font-family: var(--font-mono);
-    font-size: 0.82rem;
+  @media (max-width: 860px) {
+    .hero__grid,
+    .split-section,
+    .steps {
+      grid-template-columns: 1fr;
+    }
+    .hero h1 {
+      max-width: 10ch;
+    }
   }
 </style>

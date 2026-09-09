@@ -13,7 +13,7 @@
   --danger: #b6422f;
   --inverse: #ffffff;
   --shadow-sm: 0 10px 30px rgb(20 74 92 / 10%);
-  --shadow-md: 0 22px 70px rgb(20 74 92 / 15%);
+  --shadow-md: 0 22px 70px rgb(20 74 92 / 12%);
   --radius-sm: 0.75rem;
   --radius-md: 1.25rem;
   --radius-lg: 2rem;
@@ -69,7 +69,7 @@ a {
   border: 2px solid var(--accent);
   border-radius: 999px;
   text-decoration: none;
-  font-weight: 800;
+  font-weight: 760;
   transform: translateY(-160%);
   z-index: 100;
 }
@@ -87,7 +87,7 @@ a {
   margin: 0;
   font-family: var(--font-mono);
   font-size: 0.76rem;
-  font-weight: 800;
+  font-weight: 760;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--accent-strong);
@@ -108,7 +108,7 @@ a {
   background: var(--surface);
   color: var(--ink);
   box-shadow: 0 1px 0 rgb(255 255 255 / 80%) inset;
-  font-weight: 800;
+  font-weight: 760;
   text-decoration: none;
 }
 

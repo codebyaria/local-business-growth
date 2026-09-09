@@ -1,7 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "version": 2,
-  "buildCommand": "pnpm install --frozen-lockfile && pnpm --filter @sejukcepat/web build && rm -rf dist && cp -r apps/web/dist ./dist",
-  "installCommand": "pnpm install --frozen-lockfile",
-  "outputDirectory": "dist"
+  "version": 2
 }

@@ -12,6 +12,7 @@ build/
 apps/cms/.strapi/
 apps/cms/build/
 apps/web/dist/
+apps/web/.vercel/
 
 # Strapi runtime
 apps/cms/.tmp/

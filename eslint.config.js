@@ -10,6 +10,7 @@ export default [
       '**/build/**',
       '**/.astro/**',
       '**/.strapi/**',
+      '**/.vercel/**',
       '**/.tmp/**',
       'apps/cms/src/admin/**',
       'apps/cms/src/plugins/**',

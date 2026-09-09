@@ -1,6 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
-import node from '@astrojs/node';
+import vercel from '@astrojs/vercel';
 
 const siteOrigin = process.env.SITE_ORIGIN?.replace(/\/$/, '');
 
@@ -8,7 +8,10 @@ export default defineConfig({
   ...(siteOrigin ? { site: siteOrigin } : {}),
   trailingSlash: 'always',
   output: 'server',
-  adapter: node({ mode: 'standalone' }),
+  adapter: vercel({
+    imageService: false,
+    webAnalytics: { enabled: false },
+  }),
   security: {
     checkOrigin: false,
   },

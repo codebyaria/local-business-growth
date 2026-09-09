@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@astrojs/node": "^9.4.7",
+    "@astrojs/vercel": "^8.2.7",
     "@sejukcepat/shared": "workspace:*",
     "astro": "^5.1.5"
   },

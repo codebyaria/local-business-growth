@@ -1,0 +1,37 @@
+{
+  "kind": "collectionType",
+  "collectionName": "locations",
+  "info": {
+    "singularName": "location",
+    "pluralName": "locations",
+    "displayName": "Location",
+    "description": "Service area (Jakarta Selatan, etc.)"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "slug": {
+      "type": "uid",
+      "targetField": "name.en",
+      "required": true
+    },
+    "name": {
+      "type": "json",
+      "required": true
+    },
+    "region": {
+      "type": "json"
+    },
+    "serviceCount": {
+      "type": "integer",
+      "default": 0,
+      "min": 0
+    },
+    "responseTimeMinutes": {
+      "type": "integer",
+      "required": true,
+      "min": 0
+    }
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "kind": "singleType",
+  "collectionName": "site_setting",
+  "info": {
+    "singularName": "site-setting",
+    "pluralName": "site-settings",
+    "displayName": "Site Setting",
+    "description": "Singleton settings for site brand, tagline, and contact"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "brand": {
+      "type": "json",
+      "required": true
+    },
+    "tagline": {
+      "type": "json",
+      "required": true
+    },
+    "establishedYear": {
+      "type": "integer",
+      "required": true,
+      "min": 1990
+    },
+    "primaryLocale": {
+      "type": "enumeration",
+      "enum": ["id", "en"],
+      "default": "id"
+    },
+    "whatsapp": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "address": {
+      "type": "json"
+    },
+    "serviceAreas": {
+      "type": "json"
+    },
+    "businessHours": {
+      "type": "json"
+    }
+  }
+}

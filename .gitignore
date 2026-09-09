@@ -1,8 +1,41 @@
-node_modules
-dist
-.astro
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Builds
+dist/
+build/
+.cache/
+.astro/
+.turbo/
+.strapi/
+apps/cms/.strapi/
+apps/cms/build/
+apps/web/dist/
+
+# Strapi runtime
+apps/cms/.tmp/
+apps/cms/.strapi-updater.json
+
+# Strapi generated TS types (auto-generated on boot)
+apps/cms/types/generated/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Local env files
 .env
 .env.local
-coverage
-*.log
+.env.*.local
+apps/web/.env
+apps/cms/.env
+
+# Coverage / cache
+coverage/
+
+# OS
 .DS_Store
+Thumbs.db

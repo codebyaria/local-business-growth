@@ -7,7 +7,7 @@
         "http://localhost:4321/blog/",
         "http://localhost:4321/contact/"
       ],
-      "startServerCommand": "pnpm preview --host 127.0.0.1 --port 4321",
+      "startServerCommand": "pnpm --filter @sejukcepat/web preview --host 127.0.0.1 --port 4321",
       "startServerReadyPattern": "Local|ready",
       "startServerReadyTimeout": 30000,
       "numberOfRuns": 1

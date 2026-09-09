@@ -1,0 +1,33 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "esModuleInterop": true,
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "types": ["node"],
+    "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
+    "paths": {
+      "@sejukcepat/shared": ["../../packages/shared/src/index.ts"],
+      "@sejukcepat/shared/*": ["../../packages/shared/src/*"]
+    }
+  },
+  "include": ["src/**/*", "data/**/*", "config/**/*", "database/**/*"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    ".tmp",
+    ".cache",
+    ".strapi",
+    "src/admin",
+    "types/generated"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "jsx": "preserve",
+    "types": ["astro/client"],
+    "allowImportingTsExtensions": true,
+    "paths": {
+      "@sejukcepat/shared": ["../../packages/shared/src/index.ts"],
+      "@sejukcepat/shared/*": ["../../packages/shared/src/*"]
+    }
+  },
+  "include": ["src/**/*", "tests/**/*", "astro.config.mjs", "vitest.config.ts"],
+  "exclude": ["dist", ".astro", "node_modules"]
+}

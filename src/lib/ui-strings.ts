@@ -17,9 +17,9 @@ export const ui = {
       contact: 'Kontak',
     },
     home: {
-      eyebrow: 'Portfolio demo · Sample content',
+      eyebrow: 'Teknisi AC panggilan',
       heading: 'Service AC, kulkas, dan freezer same-day se-Jabodetabek.',
-      lead: 'Website bisnis lokal contoh — dibangun dengan Astro + adapter Strapi, bilingual routes, SEO pages, dan booking flow.',
+      lead: 'Booking teknisi AC, kulkas, dan freezer untuk rumah, ruko, dan kantor kecil. Pilih layanan, cek area, lalu tim menghubungi Anda untuk konfirmasi jadwal.',
       ctaServices: 'Lihat layanan',
       ctaBook: 'Booking sekarang',
       sectionWhat: 'Apa yang kami kerjakan',
@@ -150,9 +150,9 @@ export const ui = {
       contact: 'Contact',
     },
     home: {
-      eyebrow: 'Portfolio demo · Sample content',
+      eyebrow: 'Same-day cooling service',
       heading: 'Same-day AC, fridge, and freezer repair across Jakarta.',
-      lead: 'A sample Indonesian small-business website built with Astro, a Strapi-ready content adapter, bilingual routes, SEO pages, and a booking flow.',
+      lead: 'Book AC, fridge, and freezer technicians for homes, shop houses, and small offices. Choose a service, check your area, then the team confirms the schedule.',
       ctaServices: 'Browse services',
       ctaBook: 'Book a visit',
       sectionWhat: 'What we do',

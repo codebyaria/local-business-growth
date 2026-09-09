@@ -53,6 +53,14 @@ a {
   color: inherit;
 }
 
+h1,
+h2,
+h3,
+h4,
+strong {
+  font-weight: 620;
+}
+
 :focus-visible {
   outline: 3px solid var(--sun-strong);
   outline-offset: 3px;
@@ -69,7 +77,7 @@ a {
   border: 2px solid var(--accent);
   border-radius: 999px;
   text-decoration: none;
-  font-weight: 760;
+  font-weight: 600;
   transform: translateY(-160%);
   z-index: 100;
 }
@@ -87,7 +95,7 @@ a {
   margin: 0;
   font-family: var(--font-mono);
   font-size: 0.76rem;
-  font-weight: 760;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--accent-strong);
@@ -108,7 +116,7 @@ a {
   background: var(--surface);
   color: var(--ink);
   box-shadow: 0 1px 0 rgb(255 255 255 / 80%) inset;
-  font-weight: 760;
+  font-weight: 600;
   text-decoration: none;
 }
 
@@ -137,7 +145,7 @@ a {
   background: rgb(255 255 255 / 76%);
   color: var(--soft-ink);
   font-size: 0.86rem;
-  font-weight: 750;
+  font-weight: 600;
 }
 
 @media (max-width: 720px) {

@@ -1,22 +1,37 @@
 ## Development
 
-When starting the dev server, use background mode:
+This is a pnpm workspace monorepo with two apps:
 
-```
-astro dev --background
+- `apps/web` — Astro 5 marketing site
+- `apps/cms` — Strapi 5 headless CMS
+
+When starting the dev server, run from the repo root:
+
+```bash
+# Both apps concurrently (web at :4321, cms at :1337)
+pnpm dev
+
+# Or just one
+pnpm dev:web
+pnpm dev:cms
 ```
 
-Manage the background server with `astro dev stop`, `astro dev status`, and `astro dev logs`.
+The CMS seeds services, locations, articles, and an admin user on first boot
+when the SQLite database is empty. Re-running the seed is a no-op.
+
+For all quality gates run from the root:
+
+```bash
+pnpm install
+pnpm format:check
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build:web
+```
 
 ## Documentation
 
-Full documentation: https://docs.astro.build
-
-Consult these guides before working on related tasks:
-
-- [Adding pages, dynamic routes, or middleware](https://docs.astro.build/en/guides/routing/)
-- [Working with Astro components](https://docs.astro.build/en/basics/astro-components/)
-- [Using React, Vue, Svelte, or other framework components](https://docs.astro.build/en/guides/framework-components/)
-- [Adding or managing content](https://docs.astro.build/en/guides/content-collections/)
-- [Adding styles or using Tailwind](https://docs.astro.build/en/guides/styling/)
-- [Supporting multiple languages](https://docs.astro.build/en/guides/internationalization/)
+- Astro: https://docs.astro.build
+- Strapi 5: https://docs.strapi.io
+- pnpm workspaces: https://pnpm.io/workspaces

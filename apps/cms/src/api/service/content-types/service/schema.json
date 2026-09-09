@@ -1,0 +1,40 @@
+{
+  "kind": "collectionType",
+  "collectionName": "services",
+  "info": {
+    "singularName": "service",
+    "pluralName": "services",
+    "displayName": "Service",
+    "description": "Service offering (AC cleaning, gas refill, etc.)"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "slug": {
+      "type": "uid",
+      "targetField": "name.en",
+      "required": true
+    },
+    "name": {
+      "type": "json",
+      "required": true
+    },
+    "summary": {
+      "type": "json"
+    },
+    "description": {
+      "type": "json"
+    },
+    "startingPriceIdr": {
+      "type": "integer",
+      "required": true,
+      "min": 0
+    },
+    "durationMinutes": {
+      "type": "integer",
+      "required": true,
+      "min": 0
+    }
+  }
+}

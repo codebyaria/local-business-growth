@@ -1,41 +1,41 @@
 {
-  "name": "local-business-growth",
-  "type": "module",
+  "name": "sejuk-cepat-monorepo",
   "version": "0.1.0",
+  "private": true,
+  "type": "module",
   "engines": {
     "node": ">=22.12.0"
   },
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro",
+    "dev": "concurrently -k -n web,cms -c blue,magenta \"pnpm dev:web\" \"pnpm dev:cms\"",
+    "dev:web": "pnpm --filter @sejukcepat/web dev",
+    "dev:cms": "pnpm --filter @sejukcepat/cms develop",
+    "build": "pnpm build:web && pnpm build:cms",
+    "build:web": "pnpm --filter @sejukcepat/web build",
+    "build:cms": "pnpm --filter @sejukcepat/cms build",
+    "start:web": "pnpm --filter @sejukcepat/web preview",
+    "start:cms": "pnpm --filter @sejukcepat/cms start",
     "lint": "eslint . --max-warnings=0",
     "format:check": "prettier --check .",
     "format": "prettier --write .",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "typecheck": "pnpm --filter @sejukcepat/web typecheck && pnpm --filter @sejukcepat/cms typecheck && pnpm --filter @sejukcepat/shared typecheck",
+    "test": "pnpm --filter @sejukcepat/web test",
     "check": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test"
   },
-  "dependencies": {
-    "@astrojs/node": "^9.4.7",
-    "astro": "^5.1.5"
-  },
-  "allowScripts": {
-    "esbuild": true
-  },
   "devDependencies": {
-    "@vitest/coverage-v8": "^5.0.0",
+    "@eslint/js": "^10.0.0",
+    "concurrently": "^9.1.0",
     "eslint": "^10.10.0",
     "eslint-plugin-astro": "^3.1.0",
-    "jsdom": "^30.0.1",
     "prettier": "^3.9.6",
     "prettier-plugin-astro": "^0.14.1",
     "typescript": "~6.6.3",
-    "typescript-eslint": "^8.69.0",
-    "vitest": "^5.0.0"
+    "typescript-eslint": "^8.69.0"
   },
-  "private": true,
+  "allowScripts": {
+    "esbuild": true,
+    "sharp": true
+  },
   "pnpm": {
     "overrides": {
       "typescript": ">=6.0.0 <7.0.0"

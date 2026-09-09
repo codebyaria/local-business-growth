@@ -1,0 +1,44 @@
+{
+  "kind": "collectionType",
+  "collectionName": "articles",
+  "info": {
+    "singularName": "article",
+    "pluralName": "articles",
+    "displayName": "Article",
+    "description": "Blog post / insight / tip"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "slug": {
+      "type": "uid",
+      "targetField": "title.en",
+      "required": true
+    },
+    "title": {
+      "type": "json",
+      "required": true
+    },
+    "excerpt": {
+      "type": "json"
+    },
+    "body": {
+      "type": "json"
+    },
+    "publishedAt": {
+      "type": "datetime",
+      "required": true
+    },
+    "readMinutes": {
+      "type": "integer",
+      "default": 3,
+      "min": 1
+    },
+    "category": {
+      "type": "enumeration",
+      "enum": ["ac-care", "refrigerator", "energy", "maintenance", "news"],
+      "default": "ac-care"
+    }
+  }
+}

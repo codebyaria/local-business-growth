@@ -1,0 +1,57 @@
+# Strapi + Astro monorepo deployed via Render Blueprint.
+# Render reads this file when you connect the repo to a new Blueprint service.
+# https://docs.render.com/infrastructure-as-code
+
+services:
+  - type: web
+    name: sejuk-cepat-cms
+    runtime: node
+    rootDir: apps/cms
+    plan: free
+    buildCommand: pnpm install --frozen-lockfile && pnpm --filter @sejukcepat/cms build
+    startCommand: pnpm --filter @sejukcepat/cms start
+    healthCheckPath: /_health
+    autoDeploy: true
+    disk:
+      name: cms-data
+      mountPath: /app/apps/cms/.tmp
+      sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: '22.11.0'
+      - key: HOST
+        value: '0.0.0.0'
+      - key: PORT
+        value: '1337'
+      - key: DATABASE_CLIENT
+        value: 'sqlite'
+      - key: DATABASE_FILENAME
+        value: '.tmp/data.db'
+      - key: APP_KEYS
+        sync: false
+      - key: API_TOKEN_SALT
+        sync: false
+      - key: ADMIN_JWT_SECRET
+        sync: false
+      - key: TRANSFER_TOKEN_SALT
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: ENCRYPTION_KEY
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: CORS_ORIGINS
+        value: 'http://127.0.0.1:4321,http://localhost:4321'
+      - key: STRAPI_ADMIN_BACKEND_URL
+        fromService:
+          type: web
+          name: sejuk-cepat-cms
+          property: host
+      - key: PUBLIC_URL
+        fromService:
+          type: web
+          name: sejuk-cepat-cms
+          property: host

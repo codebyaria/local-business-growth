@@ -1,0 +1,26 @@
+{
+  "kind": "collectionType",
+  "collectionName": "testimonials",
+  "info": {
+    "singularName": "testimonial",
+    "pluralName": "testimonials",
+    "displayName": "Testimonial",
+    "description": "Customer quote"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "quote": {
+      "type": "json",
+      "required": true
+    },
+    "author": {
+      "type": "string",
+      "required": true
+    },
+    "location": {
+      "type": "json"
+    }
+  }
+}

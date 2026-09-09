@@ -3,17 +3,5 @@
   "version": 2,
   "buildCommand": "pnpm install --frozen-lockfile && pnpm build:web",
   "installCommand": "pnpm install --frozen-lockfile",
-  "outputDirectory": "apps/web/dist",
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
-    }
-  ],
-  "env": {
-    "SITE_ORIGIN": "@site_origin",
-    "STRAPI_URL": "@strapi_url",
-    "STRAPI_TOKEN": "@strapi_token",
-    "PUBLIC_ENABLE_INDEXING": "@public_enable_indexing"
-  }
+  "outputDirectory": "apps/web/dist"
 }

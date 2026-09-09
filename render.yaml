@@ -1,10 +1,4 @@
 services:
-  - type: pserv
-    name: sejuk-cepat-cms-db
-    plan: free
-    # 90-day free trial; Render sends a reminder email before it expires.
-    # No runtime/startCommand/ipAllowList on pserv — it's a managed database.
-
   - type: web
     name: sejuk-cepat-cms
     runtime: node
@@ -57,3 +51,10 @@ services:
           type: web
           name: sejuk-cepat-cms
           property: host
+
+databases:
+  - name: sejuk-cepat-cms-db
+    plan: free
+    # 90-day free trial; Render sends a reminder email before it expires.
+    databaseName: sejuk_cepat
+    postgresMajorVersion: '16'

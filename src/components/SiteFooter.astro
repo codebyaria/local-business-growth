@@ -1,5 +1,6 @@
 ---
 import type { Locale } from '../lib/i18n.ts';
+import { localizedHref } from '../lib/i18n.ts';
 
 type Props = {
   locale: Locale;
@@ -9,38 +10,80 @@ const year = new Date().getFullYear();
 const t = {
   id: {
     classification: 'Portfolio demo · Sample Indonesian service business.',
-    credit: 'Aria Nurhadi Zain · Dibangun dengan Astro + adapter Strapi',
+    credit: 'Aria Nurhadi Zain · Astro + Strapi-ready content adapter',
+    book: 'Booking teknisi',
+    services: 'Lihat layanan',
   },
   en: {
     classification: 'Portfolio demo · Sample Indonesian service business.',
-    credit: 'Aria Nurhadi Zain · Built with Astro + Strapi adapter',
+    credit: 'Aria Nurhadi Zain · Astro + Strapi-ready content adapter',
+    book: 'Book a technician',
+    services: 'Browse services',
   },
 }[locale];
 ---
 
 <footer class="site-footer">
+  <div class="container footer-card">
+    <div>
+      <p class="label">Sejuk Cepat</p>
+      <h2>{locale === 'id' ? 'Siap jadwalkan teknisi?' : 'Ready to schedule a technician?'}</h2>
+      <p>{t.classification}</p>
+    </div>
+    <div class="footer-actions">
+      <a class="button button--primary" href={localizedHref(locale, '/booking/')}>{t.book}</a>
+      <a class="button" href={localizedHref(locale, '/services/')}>{t.services}</a>
+    </div>
+  </div>
   <div class="container site-footer__row">
-    <p>{t.classification}</p>
     <p>&copy; <span>{year}</span> {t.credit}</p>
   </div>
 </footer>
 
 <style>
   .site-footer {
-    border-top: 2px solid var(--ink);
     margin-top: clamp(3rem, 8vw, 6rem);
+    padding-bottom: clamp(1.5rem, 4vw, 3rem);
   }
-  .site-footer__row {
+  .footer-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1.5rem;
+    align-items: center;
+    padding: clamp(1.25rem, 4vw, 2.25rem);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, rgb(0 166 147 / 14%), transparent 42%), var(--surface);
+    box-shadow: var(--shadow-sm);
+  }
+  h2 {
+    margin: 0.35rem 0 0.45rem;
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+  }
+  p {
+    margin: 0;
+    color: var(--soft-ink);
+  }
+  .footer-actions {
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 0.75rem;
-    padding-block: var(--space-lg, 1.5rem);
+    gap: 0.7rem;
+    justify-content: flex-end;
+  }
+  .site-footer__row {
+    padding-top: 1rem;
     font-family: var(--font-mono);
     font-size: 0.78rem;
     color: var(--soft-ink);
   }
-  p {
-    margin: 0;
+  @media (max-width: 720px) {
+    .footer-card {
+      grid-template-columns: 1fr;
+    }
+    .footer-actions {
+      justify-content: flex-start;
+    }
   }
 </style>

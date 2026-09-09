@@ -3,7 +3,7 @@ import '../styles/global.css';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import type { Locale } from '../lib/i18n.ts';
-import { DEFAULT_LOCALE, localizedHref } from '../lib/i18n.ts';
+import { DEFAULT_LOCALE, localizedHref, stripLocalePrefix } from '../lib/i18n.ts';
 
 type Props = {
   title: string;
@@ -13,16 +13,13 @@ type Props = {
 };
 
 const { title, description, canonical, locale = DEFAULT_LOCALE } = Astro.props;
-const brandByLocale = {
-  id: 'Sejuk Cepat',
-  en: 'Sejuk Cepat',
-};
-const siteName = brandByLocale[locale];
+const siteName = 'Sejuk Cepat';
 const fullTitle = title === siteName ? title : `${title} | ${siteName}`;
 const origin = Astro.site?.toString().replace(/\/$/, '') ?? '';
 const path = Astro.url.pathname;
-const enPath = localizedHref('en', path.replace(/^\/(en|id)/, '') || '/');
-const idPath = localizedHref('id', path.replace(/^\/(en|id)/, '') || '/');
+const localeFreePath = stripLocalePrefix(path);
+const enPath = localizedHref('en', localeFreePath);
+const idPath = localizedHref('id', localeFreePath);
 const canonicalHref = canonical ?? (origin ? `${origin}${path}` : undefined);
 const shouldIndex = import.meta.env.PUBLIC_ENABLE_INDEXING === 'true';
 ---
@@ -56,5 +53,41 @@ const shouldIndex = import.meta.env.PUBLIC_ENABLE_INDEXING === 'true';
     <SiteHeader locale={locale} />
     <main id="main"><slot /></main>
     <SiteFooter locale={locale} />
+    <a class="mobile-booking" href={localizedHref(locale, '/booking/')}>
+      <span>{locale === 'id' ? 'Booking teknisi' : 'Book technician'}</span>
+      <strong>{locale === 'id' ? 'Hari ini' : 'Today'}</strong>
+    </a>
   </body>
 </html>
+
+<style>
+  .mobile-booking {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    left: 1rem;
+    z-index: 40;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 58px;
+    padding: 0.75rem 1rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+    color: var(--inverse);
+    box-shadow: var(--shadow-md);
+    text-decoration: none;
+    font-weight: 850;
+  }
+  .mobile-booking strong {
+    border-radius: 999px;
+    background: rgb(255 255 255 / 18%);
+    padding: 0.25rem 0.6rem;
+    font-size: 0.82rem;
+  }
+  @media (max-width: 720px) {
+    .mobile-booking {
+      display: flex;
+    }
+  }
+</style>

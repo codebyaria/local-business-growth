@@ -1,0 +1,92 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { createContentAdapter } from '../lib/content-adapter.ts';
+import { tFor } from '../lib/ui-strings.ts';
+import { localeFromPath } from '../lib/i18n.ts';
+import { pickLocale, type Locale } from '../lib/strapi-client.ts';
+
+const adapter = createContentAdapter({
+  strapiUrl: import.meta.env.STRAPI_URL,
+  strapiToken: import.meta.env.STRAPI_TOKEN,
+});
+const settings = await adapter.fetchSiteSettings();
+const locale: Locale = localeFromPath(Astro.url.pathname);
+const t = tFor(locale);
+
+const whatsappHref = `https://wa.me/${settings.contact.whatsapp.replace(/[^\d]/g, '')}`;
+---
+
+<BaseLayout title={t.contact.title} description={t.contact.pageLead} locale={locale}>
+  <section class="container page" aria-labelledby="contact-title">
+    <p class="label">{t.contact.title}</p>
+    <h1 id="contact-title">{t.contact.pageHeading}</h1>
+    <p class="lead">{t.contact.pageLead}</p>
+
+    <dl class="contact-grid">
+      <div>
+        <dt>{t.contact.whatsappCta}</dt>
+        <dd>
+          <a href={whatsappHref}>{settings.contact.whatsapp}</a>
+        </dd>
+      </div>
+      <div>
+        <dt>{t.contact.emailLabel}</dt>
+        <dd>
+          <a href={`mailto:${settings.contact.email}`}>{settings.contact.email}</a>
+        </dd>
+      </div>
+      <div>
+        <dt>{t.contact.phoneLabel}</dt>
+        <dd>{settings.contact.phone}</dd>
+      </div>
+      <div>
+        <dt>{t.contact.addressLabel}</dt>
+        <dd>{pickLocale(settings.contact.address, locale)}</dd>
+      </div>
+      <div>
+        <dt>{t.contact.hoursLabel}</dt>
+        <dd>{pickLocale(settings.businessHours, locale)}</dd>
+      </div>
+    </dl>
+
+    <p class="footnote">
+      Source: <code>{adapter.source}</code> · Established {settings.establishedYear}
+    </p>
+  </section>
+</BaseLayout>
+
+<style>
+  .page {
+    padding-block: clamp(2rem, 5vw, 4rem);
+    display: grid;
+    gap: 1.25rem;
+    max-width: 720px;
+  }
+  .lead {
+    color: var(--soft-ink);
+    margin: 0;
+  }
+  .contact-grid {
+    display: grid;
+    gap: 1rem 2rem;
+    margin: 0;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  }
+  .contact-grid dt {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--soft-ink);
+  }
+  .contact-grid dd {
+    margin: 0.2rem 0 0;
+    font-size: 1.05rem;
+  }
+  .footnote {
+    color: var(--soft-ink);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    margin-top: 0.5rem;
+  }
+</style>

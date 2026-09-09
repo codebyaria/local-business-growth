@@ -1,0 +1,101 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { createContentAdapter } from '../../lib/content-adapter.ts';
+import { tFor } from '../../lib/ui-strings.ts';
+import { pickLocale, type Locale } from '../../lib/strapi-client.ts';
+import { localeFromPath, localizedHref } from '../../lib/i18n.ts';
+
+const adapter = createContentAdapter({
+  strapiUrl: import.meta.env.STRAPI_URL,
+  strapiToken: import.meta.env.STRAPI_TOKEN,
+});
+const locations = await adapter.fetchLocations();
+const locale: Locale = localeFromPath(Astro.url.pathname);
+const t = tFor(locale);
+---
+
+<BaseLayout title={t.locations.title} description={t.locations.pageLead} locale={locale}>
+  <section class="container page" aria-labelledby="locations-title">
+    <div class="page-hero">
+      <p class="pill">📍 {t.locations.title} · {locations.length}</p>
+      <h1 id="locations-title">{t.locations.pageHeading}</h1>
+      <p class="lead">{t.locations.pageLead}</p>
+    </div>
+
+    <ul class="area-grid">
+      {
+        locations.map((location) => (
+          <li class="area-card">
+            <a href={localizedHref(locale, `/locations/${location.slug}/`)}>
+              <span>{pickLocale(location.name, locale)}</span>
+              <strong>
+                {location.responseTimeMinutes} {t.location.minutes}
+              </strong>
+            </a>
+            <p>{pickLocale(location.region, locale)}</p>
+            <small>
+              {location.serviceCount} {locale === 'id' ? 'layanan aktif' : 'active services'}
+            </small>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .page {
+    padding-block: clamp(2rem, 6vw, 5rem);
+    display: grid;
+    gap: 1.5rem;
+  }
+  .page-hero {
+    display: grid;
+    gap: 0.75rem;
+    max-width: 720px;
+  }
+  h1 {
+    margin: 0;
+    font-size: clamp(2.15rem, 5vw, 4.1rem);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.055em;
+  }
+  .lead {
+    color: var(--soft-ink);
+    margin: 0;
+  }
+  .area-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 1rem;
+  }
+  .area-card {
+    display: grid;
+    gap: 0.7rem;
+    padding: 1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+  }
+  .area-card a {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    text-decoration: none;
+    font-weight: 620;
+  }
+  .area-card strong {
+    color: var(--accent-strong);
+    white-space: nowrap;
+  }
+  .area-card p,
+  .area-card small {
+    margin: 0;
+    color: var(--soft-ink);
+  }
+</style>

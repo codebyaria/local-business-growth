@@ -4,8 +4,9 @@ export const prerender = true;
 
 export const GET: APIRoute = ({ site, url }) => {
   const origin = (site?.toString() ?? url.origin).replace(/\/$/, '');
+  const shouldIndex = import.meta.env.PUBLIC_ENABLE_INDEXING === 'true';
   const body = `User-agent: *
-Allow: /
+${shouldIndex ? 'Allow: /' : 'Disallow: /'}
 
 Sitemap: ${origin}/sitemap.xml
 `;

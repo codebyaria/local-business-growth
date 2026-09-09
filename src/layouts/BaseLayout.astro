@@ -24,17 +24,17 @@ const path = Astro.url.pathname;
 const enPath = localizedHref('en', path.replace(/^\/(en|id)/, '') || '/');
 const idPath = localizedHref('id', path.replace(/^\/(en|id)/, '') || '/');
 const canonicalHref = canonical ?? (origin ? `${origin}${path}` : undefined);
+const shouldIndex = import.meta.env.PUBLIC_ENABLE_INDEXING === 'true';
 ---
 
-<base href={path} />
-
+<!doctype html>
 <html lang={locale}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
-    <meta name="robots" content="noindex" />
+    <meta name="robots" content={shouldIndex ? 'index,follow' : 'noindex,nofollow'} />
     {canonicalHref && <link rel="canonical" href={canonicalHref} />}
     {
       origin && (
@@ -52,7 +52,7 @@ const canonicalHref = canonical ?? (origin ? `${origin}${path}` : undefined);
     <title>{fullTitle}</title>
   </head>
   <body>
-    <a class="skip-link" href="#main">Skip to content</a>
+    <a class="skip-link" href="#main">{locale === 'id' ? 'Lewati ke konten' : 'Skip to content'}</a>
     <SiteHeader locale={locale} />
     <main id="main"><slot /></main>
     <SiteFooter locale={locale} />

@@ -5,8 +5,7 @@
  * documented in `cms-spec/README.md` so swapping fixtures for a real
  * Strapi response is a localized change.
  *
- * Classification: "Demo Using Simulated Data" per docs/honesty-and-claims.md.
- * Brand and all entries are fictional. No real business is referenced.
+ * Sample content for a portfolio demo. No real customer data is included.
  */
 import type {
   Article,
@@ -55,7 +54,7 @@ export const fixtureServices: Service[] = [
     },
     description: {
       en: 'Includes filter wash, evaporator rinse, condenser brush, drainage check, and pressure test. Recommended every 3 months for inverter units used more than 8 hours per day.',
-      id: 'Termasuk cuci filter, bilas evaporator, sikat kondensor, cek drainase, dan tes tekanan. Disanikan tiap 3 bulan untuk unit inverter yang dipakai lebih dari 8 jam per hari.',
+      id: 'Termasuk cuci filter, bilas evaporator, sikat kondensor, cek drainase, dan tes tekanan. Disarankan tiap 3 bulan untuk unit inverter yang dipakai lebih dari 8 jam per hari.',
     },
     startingPriceIdr: 75000,
     durationMinutes: 60,
@@ -70,7 +69,7 @@ export const fixtureServices: Service[] = [
     },
     description: {
       en: 'We bring a manifold gauge set, electronic leak detector, and the exact refrigerant your unit needs. If a leak is found we quote the repair before adding gas.',
-      id: 'Teknisi membawa manifold gauge, leak detector elektronik, dan refrigerant sesuai unit Anda. Jika ditemukan kebocoran, kami kasih estimate perbaikan sebelum tambah freon.',
+      id: 'Teknisi membawa manifold gauge, leak detector elektronik, dan refrigerant sesuai unit Anda. Jika ditemukan kebocoran, kami kasih estimasi perbaikan sebelum tambah freon.',
     },
     startingPriceIdr: 250000,
     durationMinutes: 90,
@@ -81,11 +80,11 @@ export const fixtureServices: Service[] = [
     name: { en: 'AC Installation & Re-location', id: 'Pasang AC & Pindah Unit' },
     summary: {
       en: 'New install or relocate an existing unit. Includes piping, brackets, and vacuum pull.',
-      id: 'Pasang baru atau pindah unit lama. Termasuk instaling, bracket, dan vakum pipa.',
+      id: 'Pasang baru atau pindah unit lama. Termasuk instalasi, bracket, dan vakum pipa.',
     },
     description: {
       en: 'Standard install up to 3 metres of copper piping, 1 hole through wall, condensate routing, and a vacuum test before charging. Extra piping and electrical work quoted separately.',
-      id: 'Instalasi standar sampai 3 meter pipa tembaga, 1 lobang tembok, routing pembuangan, dan tes vakum sebelum charging. Pipa tambahan dan pekerjaan listrik di-quote terpisah.',
+      id: 'Instalasi standar sampai 3 meter pipa tembaga, 1 lubang tembok, routing pembuangan, dan tes vakum sebelum charging. Pipa tambahan dan pekerjaan listrik di-quote terpisah.',
     },
     startingPriceIdr: 450000,
     durationMinutes: 180,
@@ -130,7 +129,7 @@ export const fixtureServices: Service[] = [
     },
     description: {
       en: 'Monthly or quarterly visits depending on usage. Includes priority same-day response, written condition reports, and a dedicated WhatsApp group for your outlet manager.',
-      id: 'Kunjungan bulanan atau quartal tergantung pemakaian. Termasuk respons same-day prioritas, laporan kondisi tertulis, dan grup WhatsApp khusus untuk manajer outlet Anda.',
+      id: 'Kunjungan bulanan atau kuartal tergantung pemakaian. Termasuk respons same-day prioritas, laporan kondisi tertulis, dan grup WhatsApp khusus untuk manajer outlet Anda.',
     },
     startingPriceIdr: 500000,
     durationMinutes: 60,

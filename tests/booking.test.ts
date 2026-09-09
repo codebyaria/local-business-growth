@@ -65,7 +65,7 @@ describe('parseBookingForm — valid', () => {
 
 describe('parseBookingForm — invalid', () => {
   it('rejects unknown serviceSlug', () => {
-    const fd = override(valid, { serviceSlug: '' });
+    const fd = override(valid, { serviceSlug: 'unknown-service' });
     const result = parseBookingForm(fd);
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.field).toBe('serviceSlug');

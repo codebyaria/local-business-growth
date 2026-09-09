@@ -96,7 +96,21 @@ const howItWorks =
               >
             </div>
             <div class="ac-illustration" aria-hidden="true">
-              <span></span>
+              <picture>
+                <source
+                  srcset="/images/ac-unit-420.webp 420w, /images/ac-unit-640.webp 640w"
+                  type="image/webp"
+                  sizes="(max-width: 860px) 220px, 260px"
+                />
+                <img
+                  src="/images/ac-unit-420.png"
+                  alt=""
+                  width="420"
+                  height="203"
+                  loading="eager"
+                  decoding="async"
+                />
+              </picture>
             </div>
           </div>
           <p class="price-line">
@@ -373,28 +387,31 @@ const howItWorks =
   }
   .ac-illustration {
     position: relative;
-    min-height: 5rem;
-  }
-  .ac-illustration::before {
-    position: absolute;
-    inset: 0.6rem 0.2rem auto auto;
-    width: 7.3rem;
-    height: 2.35rem;
-    border: 1px solid #dfe9ec;
-    border-radius: 0.6rem 0.6rem 0.95rem 0.95rem;
-    background: linear-gradient(180deg, #ffffff, #eef7fa);
-    box-shadow: 0 16px 28px rgb(90 107 118 / 18%);
-    content: '';
+    display: grid;
+    justify-items: end;
+    min-height: 5.8rem;
   }
   .ac-illustration::after {
     position: absolute;
-    inset: 3.1rem 0.8rem auto auto;
-    width: 6rem;
-    height: 2.3rem;
+    inset: 3.7rem 0.8rem auto auto;
+    width: 7.4rem;
+    height: 2.8rem;
     border-radius: 50%;
-    background: radial-gradient(ellipse, rgb(0 166 147 / 22%), transparent 68%);
+    background: radial-gradient(ellipse, rgb(0 166 147 / 20%), transparent 68%);
     content: '';
-    filter: blur(4px);
+    filter: blur(5px);
+  }
+  .ac-illustration picture,
+  .ac-illustration img {
+    position: relative;
+    z-index: 1;
+    display: block;
+  }
+  .ac-illustration img {
+    width: min(100%, 10.7rem);
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 16px 22px rgb(90 107 118 / 16%));
   }
   .price-line {
     padding-top: 1rem;
